@@ -40,6 +40,8 @@ public class CommonClass {
     public static void init(Minecraft client) {
         instance = new CommonClass();
         CommonClass.client = client;
+
+        RenderSystem
     }
 
     public static CommonClass getInstance() {
