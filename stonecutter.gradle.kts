@@ -3,7 +3,13 @@ plugins {
 }
 stonecutter active "1.21.6-fabric"
 
-stonecutter registerChiseled tasks.register("chiseledBuild", stonecutter.chiseled) { 
-    group = "project"
-    ofTask("build")
+allprojects {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven("https://maven.neoforged.net/releases")
+        maven("https://maven.fabricmc.net/")
+        maven("https://maven.shedaniel.me/")
+        maven("https://maven.terraformersmc.com/")
+    }
 }
