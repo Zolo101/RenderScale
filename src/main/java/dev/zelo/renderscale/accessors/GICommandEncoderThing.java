@@ -1,3 +1,5 @@
+//? >= 1.21.5 {
+
 package dev.zelo.renderscale.accessors;
 
 import com.mojang.blaze3d.systems.CommandEncoder;
@@ -10,3 +12,4 @@ public interface GICommandEncoderThing extends CommandEncoder {
                                                  int sourceWidth, int sourceHeight,
                                                  int destWidth, int destHeight, boolean isDepth);
 }
+//?}

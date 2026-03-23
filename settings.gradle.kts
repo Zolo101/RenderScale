@@ -1,48 +1,39 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()
+        mavenLocal()
         mavenCentral()
-
-        // Modstitch
-        maven("https://maven.isxander.dev/releases/")
-
-        // Loom platform
-        maven("https://maven.fabricmc.net/")
-
-        // MDG platform
-        maven("https://maven.neoforged.net/releases/")
-
-        // Stonecutter
-        maven("https://maven.kikugie.dev/releases")
-        maven("https://maven.kikugie.dev/snapshots")
+        gradlePluginPortal()
+        maven("https://maven.fabricmc.net/") { name = "Fabric" }
+        maven("https://maven.neoforged.net/releases/") { name = "NeoForged" }
+        maven("https://maven.kikugie.dev/snapshots") { name = "KikuGie Snapshots" }
+        maven("https://maven.kikugie.dev/releases") { name = "KikuGie Releases" }
+        maven("https://maven.parchmentmc.org") { name = "ParchmentMC" }
+        maven("https://maven.terraformersmc.com/") { name = "TerraformersMC" }
+        exclusiveContent {
+            forRepository { maven("https://api.modrinth.com/maven") { name = "Modrinth" } }
+            filter { includeGroup("maven.modrinth") }
+        }
     }
+    includeBuild("build-logic")
 }
 
 plugins {
-//    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-    id("dev.kikugie.stonecutter") version "0.7+"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    id("dev.kikugie.stonecutter") version "0.8"
 }
 
 stonecutter {
-    kotlinController = true
-    centralScript = "build.gradle.kts"
-
     create(rootProject) {
-        /**
-         * @param mcVersion The base minecraft version.
-         * @param loaders A list of loaders to target, supports "fabric" (1.14+), "neoforge"(1.20.6+), "vanilla"(any) or "forge"(<=1.20.1)
-         */
-        fun mc(mcVersion: String, name: String = mcVersion, loaders: Iterable<String>) =
-            loaders.forEach { version("$name-$it", mcVersion) }
+        fun match(version: String, vararg loaders: String) =
+            loaders.forEach { version("$version-$it", version).buildscript = "build.$it.gradle.kts" }
 
-        // Configure your targets here!
-        mc("1.21.6", loaders = listOf("fabric", "neoforge"))
-//        mc("1.20.1", loaders = listOf("forge"))
+        match("1.20.1", "forge")
+        match("1.21.4", "fabric", "neoforge")
+        match("1.21.5", "fabric", "neoforge")
+        match("1.21.6", "fabric", "neoforge")
+//        match("1.21.9", "fabric", "neoforge")
+        match("1.21.11", "fabric", "neoforge")
 
-        // This is the default target.
-        // https://stonecutter.kikugie.dev/stonecutter/guide/setup#settings-settings-gradle-kts
-        vcsVersion = "1.21.6-fabric"
+        vcsVersion = "1.21.11-fabric"
     }
 }
-// This should match the folder name of the project, or else IDEA may complain (see https://youtrack.jetbrains.com/issue/IDEA-317606)
-rootProject.name = "RenderScale"

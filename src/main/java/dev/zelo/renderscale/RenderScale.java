@@ -1,14 +1,28 @@
 package dev.zelo.renderscale;
 
+import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
-import dev.zelo.renderscale.accessors.GICommandEncoderThing;
 import dev.zelo.renderscale.config.RenderScaleConfig;
+import dev.zelo.renderscale.platform.Platform;
 import me.shedaniel.autoconfig.ConfigHolder;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
+
+//? fabric {
+import dev.zelo.renderscale.platform.fabric.FabricPlatform;
+//?} neoforge {
+/*import dev.zelo.renderscale.platform.neoforge.NeoforgePlatform;
+ *///?} forge {
+/*import dev.zelo.renderscale.platform.forge.ForgePlatform;
+ *///?}
+
+//? >= 1.21.5 {
+
+import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
+import dev.zelo.renderscale.accessors.GICommandEncoderThing;
+//?}
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -30,6 +44,22 @@ public class RenderScale {
     public boolean hasRun = false;
 
     public static final ConfigHolder<RenderScaleConfig> CONFIG = RenderScaleConfig.init();
+
+    public static final Platform PLATFORM = createPlatformInstance();
+
+    static Platform xplat() {
+        return PLATFORM;
+    }
+
+    private static Platform createPlatformInstance() {
+        //? fabric {
+        return new FabricPlatform();
+        //?} neoforge {
+        /*return new NeoforgePlatform();
+         *///?} forge {
+        /*return new ForgePlatform();
+         *///?}
+    }
 
     // Fabric
     public static void init() {
@@ -65,6 +95,7 @@ public class RenderScale {
     }
 
     public void setShouldScale(boolean shouldScale) {
+        //? >=1.21.5 {
         Window window = client.getWindow();
         int width = window.getWidth();
         int height = window.getHeight();
@@ -102,6 +133,37 @@ public class RenderScale {
                 Constants.LOG.error("Error copying texture", e);
             }
         }
+        //?} else {
+        /*if (this.shouldScale == shouldScale) return;
+
+        Window window = client.getWindow();
+        if (renderTarget == null) {
+            this.shouldScale = true;
+            renderTarget = new MainTarget(window.getWidth(), window.getHeight());
+        }
+
+        this.shouldScale = shouldScale;
+
+        if (shouldScale) {
+            clientRenderTarget = client.getMainRenderTarget();
+
+            setClientRenderTarget(renderTarget);
+            //? <= 1.21.4 {
+            /^renderTarget.bindWrite(true);
+            ^///?}
+        } else {
+            setClientRenderTarget(clientRenderTarget);
+            //? <= 1.21.4 {
+            /^client.getMainRenderTarget().bindWrite(true);
+            ^///?}
+
+            //? <= 1.21.4 {
+            /^renderTarget.blitToScreen(window.getWidth(), window.getHeight());
+            ^///?} else {
+            renderTarget.blitAndBlendToScreen(window.getWidth(), window.getHeight());
+            //?}
+        }
+        *///?}
     }
 
     // Takes into account shouldScale
@@ -115,6 +177,20 @@ public class RenderScale {
     }
 
     public void resizeRenderTarget() {
+        resize(renderTarget);
+    }
+
+    public void resizeMinecraftRenderTargetSize() {
+//        resize(client.levelRenderer.entityOutlineTarget());
+    }
+
+    public int clamp(int number, int min, int max) {
+        if (number < min) return min;
+        if (number > max) return max;
+        return number;
+    }
+
+    private void resize(@Nullable RenderTarget renderTarget) {
         if (renderTarget == null) return;
 
         boolean prev = shouldScale;
@@ -124,9 +200,14 @@ public class RenderScale {
         int width = window.getWidth();
         int height = window.getHeight();
 
-        int scaledWidth = Math.clamp(width, 1, 65536);
-        int scaledHeight = Math.clamp(height, 1, 65536);
+        int scaledWidth = clamp(width, 1, 65536);
+        int scaledHeight = clamp(height, 1, 65536);
+
         renderTarget.resize(scaledWidth, scaledHeight);
+//        //? >= 1.21.6 {
+//        //?} else {
+//        /*renderTarget.resize(scaledWidth, scaledHeight);
+//        *///?}
 
         shouldScale = prev;
     }

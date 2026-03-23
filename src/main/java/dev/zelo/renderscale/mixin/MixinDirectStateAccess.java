@@ -1,10 +1,14 @@
+//? >= 1.21.5 {
+
 package dev.zelo.renderscale.mixin;
 
 import com.mojang.blaze3d.opengl.DirectStateAccess;
+import dev.kikugie.fletching_table.annotation.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(DirectStateAccess.class)
+@MixinEnvironment(type = MixinEnvironment.Env.CLIENT)
 public interface MixinDirectStateAccess {
     @Invoker("blitFrameBuffers")
     void invokeBlitFrameBuffers(
@@ -32,3 +36,4 @@ public interface MixinDirectStateAccess {
 //            boolean useStencil
 //    );
 }
+//?}

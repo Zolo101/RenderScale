@@ -1,21 +1,11 @@
 {
+  "package": "dev.zelo.renderscale.mixin",
   "required": true,
   "minVersion": "0.8",
-  "package": "dev.zelo.renderscale.mixin",
-  "refmap": "${mod_id}.refmap.json",
-  "compatibilityLevel": "JAVA_18",
-  "client": [
-    "MixinDirectStateAccess",
-    "MixinGameRenderer",
-    "MixinGlCommandEncoder",
-    "MixinLevelRenderer",
-    "MixinWindow"
-  ],
-  "server": [],
+  "compatibilityLevel": "${java}",
   "injectors": {
     "defaultRequire": 1
   },
-  "mixins": [
-    "compat.iris.MixinIris"
-  ]
+  "client": [],
+  "mixins": []
 }

@@ -1,7 +1,10 @@
+//? >= 1.21.5 {
+
 package dev.zelo.renderscale.mixin;
 
 import com.mojang.blaze3d.opengl.*;
 import com.mojang.blaze3d.textures.GpuTexture;
+import dev.kikugie.fletching_table.annotation.MixinEnvironment;
 import dev.zelo.renderscale.RenderScale;
 import dev.zelo.renderscale.accessors.GICommandEncoderThing;
 import org.lwjgl.opengl.GL11C;
@@ -12,6 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(GlCommandEncoder.class)
+@MixinEnvironment(type = MixinEnvironment.Env.CLIENT)
 public abstract class MixinGlCommandEncoder implements GICommandEncoderThing {
     @Shadow
     private boolean inRenderPass;
@@ -73,3 +77,4 @@ public abstract class MixinGlCommandEncoder implements GICommandEncoderThing {
         }
     }
 }
+//?}
