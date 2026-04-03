@@ -4,9 +4,9 @@ RenderScale allows you to change Minecraft's render resolution **separately** fr
 
 This is a fork of [ResolutionControl++](https://github.com/ModLabsCC/Resolution-Control), with added support for NeoForge.
 
-![Comparison of FPS for each common render scale](comparison2.webp)
+![Comparison of FPS for each common render scale](https://cdn.modrinth.com/data/cached_images/682bd81994c56be5aba19d1e04629083aae0b4d3.webp)
 
-![Comparison of anti-aliasing for 1x and 2x render scales](ssma2.png)
+![Comparison of anti-aliasing for 1x and 2x render scales](https://cdn.modrinth.com/data/cached_images/05b00c51dd0c1c07b398160dfa161b67ddc36d16.png)
 
 Check out [Fabrishot](https://modrinth.com/mod/fabrishot) if you also want the large screenshot feature that was in ResolutionControl.
 
@@ -26,9 +26,11 @@ There are plans for Dynamic Resolution!
 
 # Compatibility
 
-Aims to be compatible with any mod, including Sodium, Iris, etc. You can report any issues [here](https://github.com/Zolo101/RenderScale/issues), or on my [discord](https://discord.com/invite/YVuuF9KB5j). Make sure to include your MC logs!
+## ⚠️ This mod is NOT compatible with Lunar Client / Feather Client. It will break if you use them.
 
-**1.21.5+ Note**: There may be some issues using Distant Horizons with shaders. Check out [📌 1.21.5 Distant Horizons with Shaders Infomation](https://github.com/Zolo101/RenderScale/issues/26) for potential fixes.
+Aims to be compatible with any mod, including Sodium, Iris, etc. However, there are mods that can break RenderScale. You can report any issues [here](https://github.com/Zolo101/RenderScale/issues), or on my [discord](https://discord.com/invite/YVuuF9KB5j). Make sure to include your latest MC logs!
+
+**1.21.5+ Nvidia Note**: Very rarely, certain systems with NVIDIA GPUs can get UI artifacts while in inventory, etc. If you're affected by this, check out [1.21.5+ NVIDIA UI Artifacts](https://github.com/Zolo101/RenderScale/issues/29) for updates and potential fixes.
 
 ---
 
@@ -36,7 +38,10 @@ Aims to be compatible with any mod, including Sodium, Iris, etc. You can report 
 
 | Minecraft       | Fabric | NeoForge | Forge |
 |-----------------|--------|----------|-------|
-| 1.21.4+         | ✅      | ✅        | 🚫    |
+| 1.21.11 | ✅      | ✅       | 🚫    |
+| 1.21.6 - 1.21.10 | ✅      | 🕛 [4]        | 🚫    |
+| 1.21.5          | ✅      | ✅        | 🚫    |
+| 1.21.4          | ✅      | ✅        | 🚫    |
 | 1.21.2 - 1.21.3 | 🚫 [1] | 🚫       | 🚫    |
 | 1.21.0 - 1.21.1 | ✅ [3]  | ✅ [3]    | 🚫    |
 | 1.20.4 - 1.20.6 | 🚫 [1] | 🚫       | 🚫    |
@@ -48,3 +53,5 @@ Aims to be compatible with any mod, including Sodium, Iris, etc. You can report 
 [2] Available on [ResolutionControl+](https://modrinth.com/mod/resolution-control-plus)
 
 [3] Currently does not support Fabulous graphics
+
+[4] soon...

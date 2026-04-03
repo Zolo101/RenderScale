@@ -7,6 +7,6 @@
   "text.autoconfig.renderscale.option.irisScale.@Tooltip": "-1 to keep as same (default)",
   "text.autoconfig.renderscale.category.default": "General",
   "text.autoconfig.renderscale.category.iris": "Shaders",
-  "key.renderscale.category": "RenderScale",
+  "key.category.renderscale.category": "RenderScale",
   "key.renderscale.options": "Open Config"
 }

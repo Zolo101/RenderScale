@@ -1,6 +1,6 @@
-//? >= 1.21.5 {
+//? >= 1.21.5 && < 26.1 {
 
-package dev.zelo.renderscale.accessors;
+/*package dev.zelo.renderscale.accessors;
 
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -12,4 +12,4 @@ public interface GICommandEncoderThing extends CommandEncoder {
                                                  int sourceWidth, int sourceHeight,
                                                  int destWidth, int destHeight, boolean isDepth);
 }
-//?}
+*///?}

@@ -1,6 +1,6 @@
-//? >= 1.21.5 {
+//? >= 1.21.5 && < 26.1 {
 
-package dev.zelo.renderscale.mixin;
+/*package dev.zelo.renderscale.mixin;
 
 import com.mojang.blaze3d.opengl.*;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -77,4 +77,4 @@ public abstract class MixinGlCommandEncoder implements GICommandEncoderThing {
         }
     }
 }
-//?}
+*///?}

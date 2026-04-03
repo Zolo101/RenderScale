@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.LevelTargetBundle;
 //?}
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import dev.kikugie.fletching_table.annotation.MixinEnvironment;
 import dev.zelo.renderscale.RenderScale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -35,7 +36,7 @@ public abstract class MixinLevelRenderer {
 //    private static void onLoadEntityOutlineShader(CallbackInfo ci) {
 //        RenderScale.getInstance().resizeMinecraftRenderTargetSize();
 //    }
-
+    // TODO: Might be unnecessary for 26.1
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;importExternal(Ljava/lang/String;Ljava/lang/Object;)Lcom/mojang/blaze3d/resource/ResourceHandle;"))
     private void onRenderWorldBegin(CallbackInfo callbackInfo) {
         if (this.entityOutlineTarget != null) {
@@ -61,4 +62,10 @@ public abstract class MixinLevelRenderer {
         RenderScale.getInstance().resizeMinecraftRenderTargetSize();
     }
     *///?}
+
+    // 549> <564
+//    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;execute(Lcom/mojang/blaze3d/resource/GraphicsResourceAllocator;Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder$Inspector;)V"))
+//    private void handBack(CallbackInfo callbackInfo) {
+//        RenderScale.getInstance().setShouldScale(false);
+//    }
 }

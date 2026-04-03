@@ -79,6 +79,7 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 
 		extension.requiredJava.set(
 			when {
+				stonecutter.eval(stonecutter.current.version, ">=26.1") -> JavaVersion.VERSION_25
 				stonecutter.eval(stonecutter.current.version, ">=1.20.6") -> JavaVersion.VERSION_21
 				stonecutter.eval(stonecutter.current.version, ">=1.18") -> JavaVersion.VERSION_17
 				stonecutter.eval(stonecutter.current.version, ">=1.17") -> JavaVersion.VERSION_16
@@ -96,7 +97,7 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 		configureProcessResources(isFabric, isNeoForge, isForge, modId, "$modVersion$channelTag", mcVersion, extension, extension.requiredJava.get())
 		configureJava(stonecutter, extension.requiredJava.get())
 		registerBuildAndCollectTask(extension, "$modVersion$channelTag")
-		configurePublishing(extension, loader, stonecutter, "$modVersion$channelTag", channelTag, version.toString())
+//		configurePublishing(extension, loader, stonecutter, "$modVersion$channelTag", channelTag, version.toString())
 	}
 
 	private fun Project.configureJarTask(modId: String, loader: String) {

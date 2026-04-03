@@ -26,11 +26,14 @@ public abstract class MixinWindow {
 
     // TODO: Is this neoforge only?
     @ModifyReturnValue(method = "getGuiScale", at = @At("RETURN"))
+    //? >= 1.21.6 {
     private int renderScale$modifyGuiScale(int original) {
+    //?} else {
+    /*private double renderScale$modifyGuiScale(double original) {
+    *///?}
         // It's NeoForges' fault for this null check
         return RenderScale.getInstance() == null ? original : (int) (original * RenderScale.getInstance().getCurrentScaleFactor());
     }
-
 
     @Inject(method = "onFramebufferResize", at = @At("RETURN"))
     private void renderScale$onFramebufferResize(long window, int framebufferWidth, int framebufferHeight, CallbackInfo ci) {

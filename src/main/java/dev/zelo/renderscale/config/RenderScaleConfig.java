@@ -11,7 +11,7 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 
 // TODO: Have a "iris" variable
-//? if fabric || neoforge
+//? !forge
 import net.irisshaders.iris.api.v0.IrisApi;
 
 @Config(name = "renderscale")
@@ -20,7 +20,7 @@ public class RenderScaleConfig implements ConfigData {
     public boolean forceLinear = false;
 
     // TODO: Support oculus?
-    //? if fabric || neoforge {
+    //? !forge {
     @ConfigEntry.Category("iris")
     @ConfigEntry.Gui.Tooltip()
     public float irisScale = -1.0f;
@@ -41,7 +41,7 @@ public class RenderScaleConfig implements ConfigData {
     }
 
     public float getScale() {
-        //? if fabric || neoforge {
+        //? !forge {
         if (RenderScale.PLATFORM.isModLoaded("iris")) {
             if (IrisApi.getInstance().isShaderPackInUse() && irisScale > 0.0f) {
                 return irisScale;

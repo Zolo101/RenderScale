@@ -3,10 +3,15 @@ package dev.zelo.renderscale;
 import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.blaze3d.textures.FilterMode;
 import dev.zelo.renderscale.config.RenderScaleConfig;
 import dev.zelo.renderscale.platform.Platform;
 import me.shedaniel.autoconfig.ConfigHolder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.Nullable;
 
 //? fabric {
@@ -21,7 +26,9 @@ import dev.zelo.renderscale.platform.fabric.FabricPlatform;
 
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.zelo.renderscale.accessors.GICommandEncoderThing;
+
+import java.util.OptionalInt;
+//import dev.zelo.renderscale.accessors.GICommandEncoderThing;
 //?}
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
@@ -95,7 +102,7 @@ public class RenderScale {
     }
 
     public void setShouldScale(boolean shouldScale) {
-        //? >=1.21.5 {
+        //? >= 1.21.5 {
         Window window = client.getWindow();
         int width = window.getWidth();
         int height = window.getHeight();
@@ -103,8 +110,12 @@ public class RenderScale {
         int scaledWidth = Math.clamp(width, 1, 65536);
         int scaledHeight = Math.clamp(height, 1, 65536);
 
+        ProfilerFiller profiler = Profiler.get();
+        profiler.push("renderscale_rescaling");
+
         if (renderTarget == null) {
-            renderTarget = new TextureTarget("RenderScale", scaledWidth, scaledHeight, true);
+//            renderTarget = new TextureTarget("RenderScale", scaledWidth, scaledHeight, true);
+            renderTarget = new MainTarget(scaledWidth, scaledHeight);
         }
 
         if (clientRenderTarget == null) {
@@ -113,22 +124,33 @@ public class RenderScale {
 
         if (shouldScale) {
             setClientRenderTarget(renderTarget);
+
+//            RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(renderTarget.getDepthTexture(), 1.0);
+//            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(renderTarget.getColorTexture(), 0);
         } else {
             try {
                 setClientRenderTarget(clientRenderTarget);
 
-                ((GICommandEncoderThing) RenderSystem.getDevice().createCommandEncoder()).renderScale$copyAndResizeTexture(
-                        renderTarget.getColorTexture(), clientRenderTarget.getColorTexture(),
-                        0, 0, 0, 0, 0,
-                        renderTarget.width, renderTarget.height,
-                        width, height, false
-                );
-                ((GICommandEncoderThing) RenderSystem.getDevice().createCommandEncoder()).renderScale$copyAndResizeTexture(
-                        renderTarget.getDepthTexture(), clientRenderTarget.getDepthTexture(),
-                        0, 0, 0, 0, 0,
-                        renderTarget.width, renderTarget.height,
-                        width, height, true
-                );
+//                RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(renderTarget.getColorTexture(), clientRenderTarget.getColorTexture(), 0, 0, 0, 0, 0, scaledWidth, scaledHeight);
+
+//                ((GICommandEncoderThing) RenderSystem.getDevice().createCommandEncoder()).renderScale$copyAndResizeTexture(
+//                        renderTarget.getColorTexture(), clientRenderTarget.getColorTexture(),
+//                        0, 0, 0, 0, 0,
+//                        renderTarget.width, renderTarget.height,
+//                        width, height, false
+//                );
+//                ((GICommandEncoderThing) RenderSystem.getDevice().createCommandEncoder()).renderScale$copyAndResizeTexture(
+//                        renderTarget.getDepthTexture(), clientRenderTarget.getDepthTexture(),
+//                        0, 0, 0, 0, 0,
+//                        renderTarget.width, renderTarget.height,
+//                        width, height, true
+//                );
+//                  clientRenderTarget.blitAndBlendToTexture(renderTarget.getColorTextureView());
+                blitAndBlendToTexture(renderTarget, clientRenderTarget, CONFIG.getConfig().getFilter() ? FilterMode.LINEAR : FilterMode.NEAREST);
+//                blitAndBlendToTexture(renderTarget, clientRenderTarget, FilterMode.LINEAR);
+//                renderTarget.blitAndBlendToTexture(clientRenderTarget.getColorTextureView());
+//                clientRenderTarget.copyDepthFrom(renderTarget);
+//                renderTarget.blitToScreen();
             } catch (Exception e) {
                 Constants.LOG.error("Error copying texture", e);
             }
@@ -164,6 +186,7 @@ public class RenderScale {
             //?}
         }
         *///?}
+        profiler.pop();
     }
 
     // Takes into account shouldScale
@@ -203,12 +226,37 @@ public class RenderScale {
         int scaledWidth = clamp(width, 1, 65536);
         int scaledHeight = clamp(height, 1, 65536);
 
+        //? >= 1.21.4 {
         renderTarget.resize(scaledWidth, scaledHeight);
+        //?} else {
+        /*renderTarget.resize(scaledWidth, scaledHeight, true);
+        *///?}
 //        //? >= 1.21.6 {
 //        //?} else {
 //        /*renderTarget.resize(scaledWidth, scaledHeight);
 //        *///?}
 
         shouldScale = prev;
+    }
+
+    public void blitAndBlendToTexture(final RenderTarget input, final RenderTarget output, final FilterMode filter) {
+        RenderSystem.assertOnRenderThread();
+
+        try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), OptionalInt.empty())) {
+            // Tracy blit is weird because I believe it's technically a debug pass.
+            // However, it looks exactly the same as vanilla, so I'm assuming it's fine.
+            renderPass.setPipeline(RenderPipelines.TRACY_BLIT);
+            RenderSystem.bindDefaultUniforms(renderPass);
+            renderPass.bindTexture("InSampler", input.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
+            renderPass.draw(0, 3);
+        }
+
+        // copying depth doesn't seem to do anything?
+//        try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getDepthTextureView(), OptionalInt.empty())) {
+////            renderPass.setPipeline(RenderPipelines.FOG_SNIPPET);
+//            RenderSystem.bindDefaultUniforms(renderPass);
+//            renderPass.bindTexture("InSampler2", input.getDepthTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
+//            renderPass.draw(0, 3);
+//        }
     }
 }

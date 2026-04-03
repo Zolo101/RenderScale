@@ -1,8 +1,8 @@
 plugins {
     id("mod-platform")
-    id("fabric-loom")
+//    id("net.fabricmc.fabric-loom-remap") // 1.21.11 and lower
+    id("net.fabricmc.fabric-loom") // 26.1+
 }
-
 
 platform {
     loader = "fabric"
@@ -64,23 +64,46 @@ repositories {
 
 dependencies {
     minecraft("com.mojang:minecraft:${prop("deps.minecraft")}")
-    mappings(
-        loom.layered {
-            officialMojangMappings()
-            if (hasProperty("deps.parchment")) parchment("org.parchmentmc.data:parchment-${prop("deps.parchment")}@zip")
-        })
-    modImplementation(libs.fabric.loader)
-    implementation(libs.moulberry.mixinconstraints)
-    include(libs.moulberry.mixinconstraints)
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${prop("deps.fabric-api")}")
-    modLocalRuntime("com.terraformersmc:modmenu:${prop("deps.modmenu")}")
 
-    // config API for mod menu
-    modApi("me.shedaniel.cloth:cloth-config-fabric:${property("deps.cloth_config")}") {
-        exclude("net.fabricmc.fabric-api")
-    }
+//    if (prop("deps.minecraft") != "26.1") {
+//        mappings(
+//            loom.layered {
+//                officialMojangMappings()
+//                if (hasProperty("deps.parchment")) parchment("org.parchmentmc.data:parchment-${prop("deps.parchment")}@zip")
+//            })
+//    }
 
-    modApi("maven.modrinth:iris:${property("deps.iris")}-fabric")
+//        modImplementation(libs.fabric.loader)
+//        implementation(libs.moulberry.mixinconstraints)
+//        include(libs.moulberry.mixinconstraints)
+//        modImplementation("net.fabricmc.fabric-api:fabric-api:${prop("deps.fabric-api")}")
+//        modLocalRuntime("com.terraformersmc:modmenu:${prop("deps.modmenu")}")
+//
+//        // config API for mod menu
+//        modApi("me.shedaniel.cloth:cloth-config-fabric:${property("deps.cloth_config")}") {
+//            exclude("net.fabricmc.fabric-api")
+//        }
+//
+//        //    modLocalRuntime("maven.modrinth:sodium:${property("deps.sodium")}-fabric")
+//        //    modLocalRuntime("maven.modrinth:iris:${property("deps.iris")}-fabric")
+//        modApi("maven.modrinth:iris:${property("deps.iris")}-fabric")
+//    } else {
+        implementation(libs.fabric.loader)
+        implementation(libs.moulberry.mixinconstraints)
+        include(libs.moulberry.mixinconstraints)
+        implementation("net.fabricmc.fabric-api:fabric-api:${prop("deps.fabric-api")}")
+        implementation("com.terraformersmc:modmenu:${prop("deps.modmenu")}")
+
+        // config API for mod menu
+        api("me.shedaniel.cloth:cloth-config-fabric:${property("deps.cloth_config")}") {
+            exclude("net.fabricmc.fabric-api")
+        }
+
+    //    modLocalRuntime("maven.modrinth:sodium:${property("deps.sodium")}-fabric")
+    //    modLocalRuntime("maven.modrinth:iris:${property("deps.iris")}-fabric")
+//    ("maven.modrinth:sodium:${property("deps.sodium")}-fabric")
+        compileOnly("maven.modrinth:iris:${property("deps.iris")}-fabric")
+//    }
 }
 
 stonecutter {

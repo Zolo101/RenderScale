@@ -25,6 +25,9 @@
   "entrypoints": {
     "client": [
       "${group}.${id}.platform.fabric.FabricClientEntrypoint"
+    ],
+    "modmenu": [
+      "${group}.${id}.compat.modmenu.ModMenuApiImpl"
     ]
   },
   "mixins": [
