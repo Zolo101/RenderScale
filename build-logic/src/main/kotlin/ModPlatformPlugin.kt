@@ -23,9 +23,10 @@ import javax.inject.Inject
 
 fun Project.prop(name: String): String = (findProperty(name) ?: "") as String
 
+// TODO: Does not take .env but the actual environment variables!
 fun Project.env(variable: String): String? = providers.environmentVariable(variable).orNull
 
-fun Project.envTrue(variable: String): Boolean = env(variable)?.toDefaultLowerCase() == "true"
+fun Project.envTrue(variable: String): Boolean = env(variable) == "true"
 
 fun RepositoryHandler.strictMaven(
 	url: String, vararg groups: String, configure: MavenArtifactRepository.() -> Unit = {}
@@ -41,8 +42,9 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 
 		val extension = extensions.create("platform", ModPlatformExtension::class.java).apply {
 			loader.convention(inferredLoader)
-			jarTask.convention(if (inferredLoaderIsFabric) "remapJar" else "jar")
-			sourcesJarTask.convention(if (inferredLoaderIsFabric) "remapSourcesJar" else "sourcesJar")
+			jarTask.convention("jar")
+//			sourcesJarTask.convention(if (inferredLoaderIsFabric) "remapSourcesJar" else "sourcesJar")
+			sourcesJarTask.convention("sourcesJar")
 		}
 
 		listOf(
@@ -79,7 +81,7 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 
 		extension.requiredJava.set(
 			when {
-				stonecutter.eval(stonecutter.current.version, ">=26.1") -> JavaVersion.VERSION_25
+				stonecutter.eval(stonecutter.current.version, ">=26") -> JavaVersion.VERSION_25
 				stonecutter.eval(stonecutter.current.version, ">=1.20.6") -> JavaVersion.VERSION_21
 				stonecutter.eval(stonecutter.current.version, ">=1.18") -> JavaVersion.VERSION_17
 				stonecutter.eval(stonecutter.current.version, ">=1.17") -> JavaVersion.VERSION_16
@@ -97,7 +99,7 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 		configureProcessResources(isFabric, isNeoForge, isForge, modId, "$modVersion$channelTag", mcVersion, extension, extension.requiredJava.get())
 		configureJava(stonecutter, extension.requiredJava.get())
 		registerBuildAndCollectTask(extension, "$modVersion$channelTag")
-//		configurePublishing(extension, loader, stonecutter, "$modVersion$channelTag", channelTag, version.toString())
+		configurePublishing(extension, loader, stonecutter, "$modVersion$channelTag", channelTag, version.toString())
 	}
 
 	private fun Project.configureJarTask(modId: String, loader: String) {

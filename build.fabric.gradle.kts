@@ -7,8 +7,10 @@ plugins {
 platform {
     loader = "fabric"
     dependencies {
+        // TODO: Remove minecraft dependency? Sodium & Iris do it
         required("minecraft") {
-            versionRange = prop("deps.minecraft")
+//            versionRange = "${prop("deps.minecraft")},${prop("publish.additionalVersions")}"
+            versionRange = ">=26.1-"
         }
         required("fabric-api") {
             slug("fabric-api")

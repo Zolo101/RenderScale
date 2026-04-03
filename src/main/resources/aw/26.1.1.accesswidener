@@ -1,0 +1,9 @@
+accessWidener v2 official
+
+accessible field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+mutable field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+
+#accessible method com/mojang/blaze3d/opengl/DirectStateAccess bindFrameBufferTextures (IIIII)V
+#extendable method com/mojang/blaze3d/opengl/DirectStateAccess bindFrameBufferTextures (IIIII)V
+#accessible method com/mojang/blaze3d/opengl/DirectStateAccess blitFrameBuffers (IIIIIIIIIIII)V
+#extendable method com/mojang/blaze3d/opengl/DirectStateAccess blitFrameBuffers (IIIIIIIIIIII)V
