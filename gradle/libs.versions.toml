@@ -1,14 +1,14 @@
 [versions]
-stonecutter = "0.8"
+stonecutter = "0.9"
 stonecutter-postprocess = "2.1-beta.8"
 mod-publish = "1.1.0"
 dotenv-gradle = "4.0.0"
-fabric-loom = "1.14-SNAPSHOT"
-neoforge-moddev = "2.0.120"
+fabric-loom = "1.15-SNAPSHOT"
+neoforge-moddev = "2.0.141"
 foojay = "1.0.0"
 fabric-loader = "0.18.4"
-devtools-ksp = "2.2.10-2.0.2"
-kotlin-jvm = "2.2.10"
+devtools-ksp = "2.3.6"
+kotlin-jvm = "2.3.20"
 fletching-table = "0.1.0-alpha.22"
 moulberry-mixinconstraints = "1.1.0"
 vanniktech-maven-publish = "0.35.0"
@@ -26,7 +26,8 @@ moulberry-mixinconstraints = { module = "com.moulberry:mixinconstraints", versio
 [plugins]
 stonecutter = { id = "dev.kikugie.stonecutter", version.ref = "stonecutter" }
 dotenv = { id = "co.uzzu.dotenv.gradle", version.ref = "dotenv-gradle" }
-fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
+fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
+fabric-loom-remap = { id = "net.fabricmc.fabric-loom-remap", version.ref = "fabric-loom" }
 neoforged-moddev = { id = "net.neoforged.moddev", version.ref = "neoforge-moddev" }
 jsonlang-postprocess = { id = "dev.kikugie.postprocess.jsonlang", version.ref = "stonecutter-postprocess" }
 mod-publish-plugin = { id = "me.modmuss50.mod-publish-plugin", version.ref = "mod-publish" }

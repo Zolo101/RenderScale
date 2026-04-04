@@ -89,9 +89,13 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 			}
 		)
 
-		if (isFabric) {
-			extension.dependencies { required("java") { versionRange = ">=${extension.requiredJava.get().majorVersion}" } }
-		}
+        if (isFabric) {
+            extension.dependencies {
+                required("java") {
+                    versionRange = ">=${extension.requiredJava.get().majorVersion}"
+                }
+            }
+        }
 
 		configureFletchingTable()
 		configureJarTask(modId, loader)
@@ -129,8 +133,18 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 			dependsOn(tasks.named("stonecutterGenerate"))
 			dependsOn("kspKotlin")
 
-			filesMatching("*.mixins.json") { expand("java" to "JAVA_${requiredJava.majorVersion}") }
+            filesMatching("*.mixins.json") {
+                val refmapLine = if (isForge) {
+                    "\"refmap\": \"${modId}.mixins.refmap.json\","
+                } else {
+                    ""
+                }
 
+                expand(
+                    "java" to "JAVA_${requiredJava.majorVersion}",
+                    "refmap" to refmapLine
+                )
+            }
 			var contributors = prop("mod.contributors")
 			var authors = prop("mod.authors")
 			var issuesUrl = prop("mod.issues_url")
@@ -288,7 +302,7 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
 			}
 
 			val isForge = loader == "forge"
-			val targetName = if(isForge) {
+			val targetName = if (isForge) {
 				"reobfJar"
 			} else {
 				ext.jarTask.get()

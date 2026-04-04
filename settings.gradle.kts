@@ -19,23 +19,31 @@ pluginManagement {
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    id("dev.kikugie.stonecutter") version "0.8"
+    id("dev.kikugie.stonecutter") version "0.9"
 }
 
 stonecutter {
     create(rootProject) {
-        fun match(version: String, vararg loaders: String) =
-            loaders.forEach { version("$version-$it", version).buildscript = "build.$it.gradle.kts" }
+        fun match(version: String, vararg loaders: String) {
+            loaders.forEach { loader ->
+                val buildscriptName = if (version.startsWith("26") && loader == "fabric") {
+                    "build.fabric26.gradle.kts"
+                } else {
+                    "build.$loader.gradle.kts"
+                }
 
-//        match("1.20.1", "fabric", "forge")
-//        match("1.21.4", "fabric", "neoforge")
-//        match("1.21.5", "fabric", "neoforge")
-//        match("1.21.6", "fabric", "neoforge")
-//        match("1.21.8", "fabric", "neoforge")
-//        match("1.21.9", "fabric", "neoforge")
-//        match("1.21.11", "fabric", "neoforge")
-//        match("26.1", "fabric", "neoforge")
-        match("26.1", "fabric")
+                version("$version-$loader", version).buildscript = buildscriptName
+            }
+        }
+
+        match("1.20.1", "fabric", "forge")
+        match("1.21.4", "fabric", "neoforge")
+        match("1.21.5", "fabric", "neoforge")
+        match("1.21.6", "fabric", "neoforge")
+        match("1.21.8", "fabric", "neoforge")
+        match("1.21.10", "fabric", "neoforge")
+        match("1.21.11", "fabric", "neoforge")
+        match("26.1", "fabric", "neoforge")
 
 //        vcsVersion = "1.21.11-fabric"
         vcsVersion = "26.1-fabric"
