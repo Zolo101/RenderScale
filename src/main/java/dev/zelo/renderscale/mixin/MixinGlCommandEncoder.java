@@ -1,4 +1,4 @@
-//? >= 1.21.5 && < 26.1 {
+//? >= 1.21.5 && < 1.21.11 {
 
 /*package dev.zelo.renderscale.mixin;
 

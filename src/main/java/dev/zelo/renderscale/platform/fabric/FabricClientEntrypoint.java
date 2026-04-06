@@ -14,8 +14,8 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 /*import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 *///?}
 
-//? >= 1.21.6
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+//import net.fabricmc.fabric.api.client.rendering.v1.world.LevelRenderEvents;
 import net.minecraft.client.KeyMapping;
 
 import org.lwjgl.glfw.GLFW;
@@ -40,21 +40,28 @@ public class FabricClientEntrypoint implements ClientModInitializer {
         /*keyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.renderscale.options", GLFW.GLFW_KEY_O, /^? >= 1.21.9 {^/ category /^?} else {^/ /^"key.renderscale.category" ^//^?}^/));
          *///?}
 
-        //? <= 1.21.6 {
-        /*WorldRenderEvents.START.register(worldRenderContext -> {
+        WorldRenderEvents.START_MAIN.register(worldRenderContext -> {
             if (!RenderScale.getInstance().hasRun) {
                 RenderScale.getInstance().resizeRenderTarget();
                 RenderScale.getInstance().hasRun = true;
             }
         });
-        *///?} else {
-        LevelRenderEvents.START_MAIN.register(levelRenderContext -> {
-            if (!RenderScale.getInstance().hasRun) {
-                RenderScale.getInstance().resizeRenderTarget();
-                RenderScale.getInstance().hasRun = true;
-            }
-        });
-        //?}
+
+//        //? <= 1.21.6 {
+//        /*WorldRenderEvents.START.register(worldRenderContext -> {
+//            if (!RenderScale.getInstance().hasRun) {
+//                RenderScale.getInstance().resizeRenderTarget();
+//                RenderScale.getInstance().hasRun = true;
+//            }
+//        });
+//        *///?} else {
+//        LevelRenderEvents.START_MAIN.register(levelRenderContext -> {
+//            if (!RenderScale.getInstance().hasRun) {
+//                RenderScale.getInstance().resizeRenderTarget();
+//                RenderScale.getInstance().hasRun = true;
+//            }
+//        });
+//        //?}
 
 
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {

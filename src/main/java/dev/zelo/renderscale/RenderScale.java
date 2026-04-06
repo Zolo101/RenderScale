@@ -7,7 +7,6 @@ import dev.zelo.renderscale.config.RenderScaleConfig;
 import dev.zelo.renderscale.platform.Platform;
 import me.shedaniel.autoconfig.ConfigHolder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.PostChain;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.Nullable;
 
@@ -102,7 +101,10 @@ public class RenderScale {
     }
 
     public void setShouldScale(boolean shouldScale) {
-        ProfilerFiller profiler = RenderScale.client.getProfiler();
+        //? >= 1.21.11 {
+        ProfilerFiller profiler = Profiler.get();
+        //? } else
+        //ProfilerFiller profiler = RenderScale.client.getProfiler();
         profiler.push("renderscale_rescaling");
         //? >= 1.21.5 {
         Window window = client.getWindow();
@@ -202,9 +204,11 @@ public class RenderScale {
 
     public void resizeRenderTarget() {
         resize(renderTarget);
-        resize(client.levelRenderer.entityTarget());
+        //? <= 1.21.1 {
+        /*resize(client.levelRenderer.entityTarget());
 
         if (hasRun) client.levelRenderer.onResourceManagerReload(client.getResourceManager());
+        *///?}
     }
 
     public void resizeMinecraftRenderTargetSize() {
@@ -243,7 +247,7 @@ public class RenderScale {
         shouldScale = prev;
     }
 
-    //? >= 26 {
+    //? >= 1.21.11 {
     public void blitAndBlendToTexture(final RenderTarget input, final RenderTarget output, final FilterMode filter) {
         RenderSystem.assertOnRenderThread();
 

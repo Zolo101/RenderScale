@@ -1,4 +1,5 @@
-package dev.zelo.renderscale.mixin;
+//? 1.20.1 {
+/*package dev.zelo.renderscale.mixin;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -33,3 +34,4 @@ public abstract class MixinRenderTarget {
         return false;
     }
 }
+*///?}

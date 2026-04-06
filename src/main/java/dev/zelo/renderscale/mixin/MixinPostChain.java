@@ -1,4 +1,5 @@
-package dev.zelo.renderscale.mixin;
+//? <= 1.21.4 {
+/*package dev.zelo.renderscale.mixin;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import dev.kikugie.fletching_table.annotation.MixinEnvironment;
@@ -37,3 +38,4 @@ public abstract class MixinPostChain {
 
     // TODO: @ModifyArgs DOES NOT WORK!! WHY?
 }
+*///?}
