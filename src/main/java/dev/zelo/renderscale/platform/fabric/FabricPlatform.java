@@ -17,10 +17,11 @@ public class FabricPlatform implements Platform {
 		return ModLoader.FABRIC;
 	}
 
-	@Override
-	public String mcVersion() {
-		return FabricLoader.getInstance().getRawGameVersion();
-	}
+    // 0.17+ fabric loader required
+//	@Override
+//	public String mcVersion() {
+//		return FabricLoader.getInstance().getRawGameVersion();
+//	}
 
 	@Override
 	public boolean isDevelopmentEnvironment() {

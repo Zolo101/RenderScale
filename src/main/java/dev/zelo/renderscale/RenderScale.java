@@ -3,16 +3,20 @@ package dev.zelo.renderscale;
 import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderPass;
-import com.mojang.blaze3d.textures.FilterMode;
 import dev.zelo.renderscale.config.RenderScaleConfig;
 import dev.zelo.renderscale.platform.Platform;
 import me.shedaniel.autoconfig.ConfigHolder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.util.profiling.Profiler;
+import net.minecraft.client.renderer.PostChain;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.Nullable;
+
+//? >= 1.21.4 {
+import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.blaze3d.textures.FilterMode;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.util.profiling.Profiler;
+//?}
 
 //? fabric {
 import dev.zelo.renderscale.platform.fabric.FabricPlatform;
@@ -89,10 +93,6 @@ public class RenderScale {
 
     public void onResolutionChanged() {
         if (getWindow() == null) return;
-        Constants.LOG.info("Size changed to {}x{} {}x{} {}x{}",
-                getWindow().getWidth(), getWindow().getHeight(),
-                getWindow().getScreenWidth(), getWindow().getScreenHeight(),
-                getWindow().getGuiScaledWidth(), getWindow().getGuiScaledHeight());
 
         resizeRenderTarget();
     }
@@ -102,6 +102,8 @@ public class RenderScale {
     }
 
     public void setShouldScale(boolean shouldScale) {
+        ProfilerFiller profiler = RenderScale.client.getProfiler();
+        profiler.push("renderscale_rescaling");
         //? >= 1.21.5 {
         Window window = client.getWindow();
         int width = window.getWidth();
@@ -110,8 +112,7 @@ public class RenderScale {
         int scaledWidth = Math.clamp(width, 1, 65536);
         int scaledHeight = Math.clamp(height, 1, 65536);
 
-        ProfilerFiller profiler = Profiler.get();
-        profiler.push("renderscale_rescaling");
+
 
         if (renderTarget == null) {
 //            renderTarget = new TextureTarget("RenderScale", scaledWidth, scaledHeight, true);
@@ -201,6 +202,9 @@ public class RenderScale {
 
     public void resizeRenderTarget() {
         resize(renderTarget);
+        resize(client.levelRenderer.entityTarget());
+
+        if (hasRun) client.levelRenderer.onResourceManagerReload(client.getResourceManager());
     }
 
     public void resizeMinecraftRenderTargetSize() {
@@ -239,6 +243,7 @@ public class RenderScale {
         shouldScale = prev;
     }
 
+    //? >= 26 {
     public void blitAndBlendToTexture(final RenderTarget input, final RenderTarget output, final FilterMode filter) {
         RenderSystem.assertOnRenderThread();
 
@@ -259,4 +264,5 @@ public class RenderScale {
 //            renderPass.draw(0, 3);
 //        }
     }
+    //?}
 }

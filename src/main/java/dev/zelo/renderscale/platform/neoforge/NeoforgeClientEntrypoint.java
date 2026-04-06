@@ -1,4 +1,4 @@
-//? if neoforge {
+//? neoforge {
 /*package dev.zelo.renderscale.platform.neoforge;
 
 import dev.zelo.renderscale.Constants;
@@ -26,17 +26,17 @@ import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
 @Mod(value = Constants.MOD_ID, dist = Dist.CLIENT)
-public class NeoforgeEntrypoint {
+public class NeoforgeClientEntrypoint {
     // TODO: Consider using Lazy? (https://docs.neoforged.net/docs/misc/keymappings/#checking-a-keymapping)
     private static KeyMapping keyBinding;
-    //? if >= 1.21.9
-    private static KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("renderscale", "category"));
+    //? >= 1.21.9
+    //private static KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("renderscale", "category"));
 
 
-    public NeoforgeEntrypoint(IEventBus eventBus, ModContainer modContainer) {
-        KeyMapping keyBinding = new KeyMapping("key.renderscale.options", GLFW.GLFW_KEY_O, /^? >= 1.21.9 {^/ category /^?} else {^/ /^"key.renderscale.category" ^//^?}^/);
+    public NeoforgeClientEntrypoint(IEventBus eventBus, ModContainer modContainer) {
+        keyBinding = new KeyMapping("key.renderscale.options", GLFW.GLFW_KEY_O, /^? >= 1.21.9 {^/ /^category ^//^?} else {^/ "key.renderscale.category" /^?}^/);
 
-        modContainer.registerExtensionPoint(IConfigScreenFactory.class, (container, screen) -> NeoforgeEntrypoint.getConfigScreen(screen));
+        modContainer.registerExtensionPoint(IConfigScreenFactory.class, (container, screen) -> NeoforgeClientEntrypoint.getConfigScreen(screen));
 
         NeoForge.EVENT_BUS.addListener(this::onWorldRenderStart);
         NeoForge.EVENT_BUS.addListener(this::onClientTickEnd);
@@ -46,12 +46,12 @@ public class NeoforgeEntrypoint {
         return AutoConfigClient.getConfigScreen(RenderScaleConfig.class, parent).get();
     }
 
-    public void onWorldRenderStart(RenderLevelStageEvent event) {
+    public void onWorldRenderStart(RenderLevelStageEvent.AfterLevel event) {
 //        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
-//            if (!RenderScale.getInstance().hasRun) {
-//                RenderScale.getInstance().resizeRenderTarget();
-//                RenderScale.getInstance().hasRun = true;
-//            }
+            if (!RenderScale.getInstance().hasRun) {
+                RenderScale.getInstance().resizeRenderTarget();
+                RenderScale.getInstance().hasRun = true;
+            }
 //        }
     }
 
@@ -66,19 +66,19 @@ public class NeoforgeEntrypoint {
     }
 
     public static void onDatapackReload() {
-        AutoConfigClient.getConfigHolder(RenderScaleConfig.class).load();
+//        AutoConfigClient.getConfigHolder(RenderScaleConfig.class).load();
     }
 
     //? < 1.21.11
-    //@EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
-    //? >= 1.21.11
     @EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
+    //? >= 1.21.11
+    //@EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
 //    @EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public class EventHandler {
         @SubscribeEvent
         public static void registerReloadManager(AddClientReloadListenersEvent event) {
             event.addListener(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "load_config"),
-                    (ResourceManagerReloadListener) c -> NeoforgeEntrypoint.onDatapackReload());
+                    (ResourceManagerReloadListener) c -> NeoforgeClientEntrypoint.onDatapackReload());
         }
 
         @SubscribeEvent

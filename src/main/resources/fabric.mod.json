@@ -30,7 +30,6 @@
       "${group}.${id}.compat.modmenu.ModMenuApiImpl"
     ]
   },
-  ${refmap}
   "mixins": [
     "${id}.mixins.json"
   ],${dependencies}

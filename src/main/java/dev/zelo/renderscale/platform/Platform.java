@@ -5,7 +5,7 @@ public interface Platform {
 
     ModLoader loader();
 
-    String mcVersion();
+//    String mcVersion();
 
     boolean isDevelopmentEnvironment();
 

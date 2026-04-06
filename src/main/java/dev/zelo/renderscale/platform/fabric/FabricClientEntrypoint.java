@@ -1,18 +1,20 @@
 package dev.zelo.renderscale.platform.fabric;
 //? fabric {
+//~ if >= 1.21.11 'AutoConfig' -> 'AutoConfigClient' {
 
 import dev.kikugie.fletching_table.annotation.fabric.Entrypoint;
 import dev.zelo.renderscale.RenderScale;
 import dev.zelo.renderscale.config.RenderScaleConfig;
+import me.shedaniel.autoconfig.AutoConfigClient;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 //? >= 26.1 {
-import me.shedaniel.autoconfig.AutoConfigClient;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 //?} else {
 /*import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import me.shedaniel.autoconfig.AutoConfig;
 *///?}
+
+//? >= 1.21.6
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.KeyMapping;
 
@@ -61,13 +63,10 @@ public class FabricClientEntrypoint implements ClientModInitializer {
             }
 
             while (keyBinding.consumeClick()) {
-                //? >= 26.1 {
                 minecraft.setScreen(AutoConfigClient.getConfigScreen(RenderScaleConfig.class, minecraft.screen).get());
-                //?} else {
-                /*minecraft.setScreen(AutoConfig.getConfigScreen(RenderScaleConfig.class, minecraft.screen).get());
-                *///?}
             }
         });
     }
 }
+//~}
 //?}

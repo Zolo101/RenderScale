@@ -8,5 +8,6 @@
   "text.autoconfig.renderscale.category.default": "General",
   "text.autoconfig.renderscale.category.iris": "Shaders",
   "key.category.renderscale.category": "RenderScale",
+  "key.renderscale.category": "RenderScale",
   "key.renderscale.options": "Open Config"
 }

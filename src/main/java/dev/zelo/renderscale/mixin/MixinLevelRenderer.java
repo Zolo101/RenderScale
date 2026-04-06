@@ -62,10 +62,4 @@ public abstract class MixinLevelRenderer {
         RenderScale.getInstance().resizeMinecraftRenderTargetSize();
     }
     *///?}
-
-    // 549> <564
-//    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;execute(Lcom/mojang/blaze3d/resource/GraphicsResourceAllocator;Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder$Inspector;)V"))
-//    private void handBack(CallbackInfo callbackInfo) {
-//        RenderScale.getInstance().setShouldScale(false);
-//    }
 }

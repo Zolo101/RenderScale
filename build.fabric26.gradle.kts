@@ -71,7 +71,6 @@ dependencies {
 
     implementation(libs.moulberry.mixinconstraints)
     include(libs.moulberry.mixinconstraints)
-    implementation("net.fabricmc.fabric-api:fabric-api:${prop("deps.fabric-api")}")
     implementation("com.terraformersmc:modmenu:${prop("deps.modmenu")}")
 
     // config API for mod menu
