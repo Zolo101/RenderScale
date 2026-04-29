@@ -1,6 +1,7 @@
 package dev.zelo.renderscale.mixin;
 
 import dev.zelo.renderscale.CommonClass;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -28,6 +29,10 @@ public abstract class MixinGameRenderer {
             waitFrameCounter++;
             if (waitFrameCounter >= 5) {
                 waitingForResolutionChange = false;
+                // Synthetic full-pipeline resize: covers macOS Retina startup case
+                // where Minecraft sized its mainRenderTarget against a stale 0x0 window
+                // (because MixinWindow ran before CommonClass.init).
+                Minecraft.getInstance().resizeDisplay();
                 CommonClass.getInstance().onResolutionChanged();
             }
         }

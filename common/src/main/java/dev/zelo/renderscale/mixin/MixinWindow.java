@@ -47,7 +47,7 @@ public abstract class MixinWindow {
             double scaleFactor = CommonClass.getInstance().getCurrentScaleFactor();
             return Math.max(Mth.ceil(((double) value) * scaleFactor), 1);
         } else {
-            return 0;
+            return value;
         }
     }
 }
