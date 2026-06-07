@@ -19,7 +19,7 @@ serialization-toml = "0.6.0"
 
 # TODO: There is a chance this is causing major issues in normal mixins (1.20.1 fabric when resizing window)
 # for forge, since modern FABRIC and NEOFORGE already have this
-#mixinextras = "0.5.3"
+mixinextras = "0.5.4"
 
 [libraries]
 kikugie-postprocess = { module = "dev.kikugie:postprocess", version.ref = "stonecutter-postprocess" }
@@ -33,8 +33,8 @@ vanniktech-maven-publish = { module = "com.vanniktech.maven.publish:com.vannikte
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization-json" }
 serialization-toml = { module = "dev.eav.tomlkt:tomlkt", version.ref = "serialization-toml" }
 # for forge
-#mixinextras-common = { module = "io.github.llamalad7:mixinextras-common", version.ref = "mixinextras" }
-#mixinextras-forge = { module = "io.github.llamalad7:mixinextras-forge", version.ref = "mixinextras" }
+mixinextras-common = { module = "io.github.llamalad7:mixinextras-common", version.ref = "mixinextras" }
+mixinextras-forge = { module = "io.github.llamalad7:mixinextras-forge", version.ref = "mixinextras" }
 
 [plugins]
 stonecutter = { id = "dev.kikugie.stonecutter", version.ref = "stonecutter" }

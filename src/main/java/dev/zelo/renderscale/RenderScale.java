@@ -10,12 +10,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.Nullable;
 
-//? >= 1.21.4 {
+//? >= 1.21.5 && < 1.21.11
+//import dev.zelo.renderscale.accessors.GICommandEncoderThing;
+
+//? >= 1.21.5 {
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.FilterMode;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.util.profiling.Profiler;
 //?}
+
+//? > 1.20.1
+import net.minecraft.util.profiling.Profiler;
 
 //? fabric {
 import dev.zelo.renderscale.platform.fabric.FabricPlatform;
@@ -31,7 +36,6 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import java.util.OptionalInt;
-//import dev.zelo.renderscale.accessors.GICommandEncoderThing;
 //?}
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
@@ -101,7 +105,7 @@ public class RenderScale {
     }
 
     public void setShouldScale(boolean shouldScale) {
-        //? >= 1.21.11 {
+        //? > 1.20.1 {
         ProfilerFiller profiler = Profiler.get();
         //? } else
         //ProfilerFiller profiler = RenderScale.client.getProfiler();
@@ -136,21 +140,25 @@ public class RenderScale {
 
 //                RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(renderTarget.getColorTexture(), clientRenderTarget.getColorTexture(), 0, 0, 0, 0, 0, scaledWidth, scaledHeight);
 
-//                ((GICommandEncoderThing) RenderSystem.getDevice().createCommandEncoder()).renderScale$copyAndResizeTexture(
-//                        renderTarget.getColorTexture(), clientRenderTarget.getColorTexture(),
-//                        0, 0, 0, 0, 0,
-//                        renderTarget.width, renderTarget.height,
-//                        width, height, false
-//                );
-//                ((GICommandEncoderThing) RenderSystem.getDevice().createCommandEncoder()).renderScale$copyAndResizeTexture(
-//                        renderTarget.getDepthTexture(), clientRenderTarget.getDepthTexture(),
-//                        0, 0, 0, 0, 0,
-//                        renderTarget.width, renderTarget.height,
-//                        width, height, true
-//                );
-//                  clientRenderTarget.blitAndBlendToTexture(renderTarget.getColorTextureView());
+                  //? >= 1.21.5 && < 1.21.11 {
+                /*((GICommandEncoderThing) RenderSystem.getDevice().createCommandEncoder()).renderScale$copyAndResizeTexture(
+                        renderTarget.getColorTexture(), clientRenderTarget.getColorTexture(),
+                        0, 0, 0, 0, 0,
+                        renderTarget.width, renderTarget.height,
+                        width, height, false
+                );
+                ((GICommandEncoderThing) RenderSystem.getDevice().createCommandEncoder()).renderScale$copyAndResizeTexture(
+                        renderTarget.getDepthTexture(), clientRenderTarget.getDepthTexture(),
+                        0, 0, 0, 0, 0,
+                        renderTarget.width, renderTarget.height,
+                        width, height, true
+                );
+                  //~ if 1.21.5 && fabric 'getColorTextureView' -> 'getColorTexture'
+                  clientRenderTarget.blitAndBlendToTexture(renderTarget.getColorTextureView());
+                  *///?} else
                 blitAndBlendToTexture(renderTarget, clientRenderTarget, CONFIG.getConfig().getFilter() ? FilterMode.LINEAR : FilterMode.NEAREST);
 //                blitAndBlendToTexture(renderTarget, clientRenderTarget, FilterMode.LINEAR);
+//                //?}
 //                renderTarget.blitAndBlendToTexture(clientRenderTarget.getColorTextureView());
 //                clientRenderTarget.copyDepthFrom(renderTarget);
 //                renderTarget.blitToScreen();

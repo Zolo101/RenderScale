@@ -26,7 +26,7 @@ public class NeoforgePlatform implements Platform {
 
 	@Override
 	public boolean isDevelopmentEnvironment() {
-		return !FMLLoader/^? if > 1.21.8 {^//^.getCurrent()^//^?}^/.isProduction();
+		return !FMLLoader/^? if > 1.21.8 {^/.getCurrent()/^?}^/.isProduction();
 	}
 }
 *///?}

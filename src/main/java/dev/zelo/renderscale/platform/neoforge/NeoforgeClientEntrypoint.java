@@ -1,7 +1,7 @@
 //~ if >= 1.21.11 'AutoConfig' -> 'AutoConfigClient' {
 //? neoforge {
-/*
-package dev.zelo.renderscale.platform.neoforge;
+
+/*package dev.zelo.renderscale.platform.neoforge;
 
 import dev.zelo.renderscale.Constants;
 import dev.zelo.renderscale.RenderScale;
@@ -32,11 +32,11 @@ public class NeoforgeClientEntrypoint {
     // TODO: Consider using Lazy? (https://docs.neoforged.net/docs/misc/keymappings/#checking-a-keymapping)
     private static KeyMapping keyBinding;
     //? >= 1.21.9
-    //private static KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("renderscale", "category"));
+    private static KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("renderscale", "category"));
 
 
     public NeoforgeClientEntrypoint(IEventBus eventBus, ModContainer modContainer) {
-        keyBinding = new KeyMapping("key.renderscale.options", GLFW.GLFW_KEY_O, /^? >= 1.21.9 {^/ /^category ^//^?} else {^/ "key.renderscale.category" /^?}^/);
+        keyBinding = new KeyMapping("key.renderscale.options", GLFW.GLFW_KEY_O, /^? >= 1.21.9 {^/ category /^?} else {^/ /^"key.renderscale.category" ^//^?}^/);
 
         modContainer.registerExtensionPoint(IConfigScreenFactory.class, (container, screen) -> NeoforgeClientEntrypoint.getConfigScreen(screen));
 
@@ -49,7 +49,7 @@ public class NeoforgeClientEntrypoint {
     }
 
     //? >= 1.21.10 {
-    /^public void onWorldRenderStart(RenderLevelStageEvent.AfterLevel event) {
+    public void onWorldRenderStart(RenderLevelStageEvent.AfterLevel event) {
 //        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
         if (!RenderScale.getInstance().hasRun) {
             RenderScale.getInstance().resizeRenderTarget();
@@ -57,8 +57,8 @@ public class NeoforgeClientEntrypoint {
         }
 //        }
     }
-    ^///? } else {
-    public void onWorldRenderStart(RenderLevelStageEvent event) {
+    //? } else {
+    /^public void onWorldRenderStart(RenderLevelStageEvent event) {
 //        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
             if (!RenderScale.getInstance().hasRun) {
                 RenderScale.getInstance().resizeRenderTarget();
@@ -66,7 +66,7 @@ public class NeoforgeClientEntrypoint {
             }
 //        }
     }
-    //? }
+    ^///? }
 
     public void onClientTickEnd(ClientTickEvent.Post event) {
         if (Minecraft.getInstance().level == null && RenderScale.getInstance().hasRun) {
@@ -83,9 +83,9 @@ public class NeoforgeClientEntrypoint {
     }
 
     //? < 1.21.11
-    @EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
-    //? >= 1.21.11
     //@EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
+    //? >= 1.21.11
+    @EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
 //    @EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public class EventHandler {
         @SubscribeEvent

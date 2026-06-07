@@ -18,13 +18,13 @@ platform {
     loader = "forge"
     dependencies {
         required("minecraft") {
-            forgeLikeVersionRange = "[${prop("deps.minecraft")}]"
+            forgeLikeVersionRange = prop("deps.minecraft")
         }
         required("forge") {
-            forgeLikeVersionRange = "[1,)"
+            forgeLikeVersionRange.set("[1,)")
         }
-        required("cloth-config-forge") {
-            forgeLikeVersionRange = "[${prop("deps.minecraft")}]"
+        required("cloth_config") {
+            forgeLikeVersionRange = prop("deps.minecraft")
         }
     }
 }
@@ -78,24 +78,10 @@ dependencies {
 //    jarJar(libs.moulberry.mixinconstraints)
 
     // mixin extras
-//    compileOnly("io.github.llamalad7:mixinextras-common:${libs.versions.mixinextras.get()}")
-//    modImplmentation("io.github.llamalad7:mixinextras-forge:${libs.versions.mixinextras.get()}")
-
-//    compileOnly(annotationProcessor(libs.mixinextras.common))
-
-//    annotationProcessor(libs.mixinextras.common)
-//    compileOnly(libs.mixinextras.common)
-
-//    implementation(jarJar(libs.mixinextras.forge))
-
-//    jarJar(libs.mixinextras.forge)
-//    implementation(libs.mixinextras.forge)
-
-//    jarJar(libs.mixinextras.forge)
-//    implementation(jarJar(lib.llamalad7.mixinextras)) {
-//        jarJar.ranged(it, "[0.5.3,)")
-//    }
-
+    annotationProcessor(libs.mixinextras.common)
+    compileOnly(libs.mixinextras.common)
+    implementation(libs.mixinextras.forge)
+    jarJar(libs.mixinextras.forge)
 
     modApi("me.shedaniel.cloth:cloth-config-forge:${property("deps.cloth_config")}") {
         exclude("net.fabricmc.fabric-api")
