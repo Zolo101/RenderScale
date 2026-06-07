@@ -1,0 +1,164 @@
+mod.id = "renderscale"
+mod.name = "RenderScale"
+mod.group = "dev.zelo"
+mod.version = "1.3.7"
+mod.channel_tag = ""
+mod.description = "RenderScale allows you to change Minecraft's render resolution separately from the HUD elements."
+mod.authors = ["Zelo101"]
+mod.contributors = []
+mod.inception_year = "2025"
+mod.license.name = "MIT"
+mod.license.url = "https://opensource.org/licenses/MIT"
+mod.license.dist = "repo"
+mod.sources_url = "https://github.com/Zolo101/RenderScale"
+mod.homepage_url = "https://github.com/Zolo101/RenderScale"
+mod.issues_url = "https://github.com/Zolo101/RenderScale/issues"
+mod.discord_url = "https://discord.gg/YVuuF9KB5j"
+
+[[mod.pom.developers]]
+id = "zelo101"
+name = "Zelo101"
+url = "https://github.com/Zolo101"
+
+[fabric]
+deps.fabric-loader = "0.19.2"
+
+[fabric."1.20.1"]
+deps.minecraft = "1.20.1"
+
+deps.cloth_config = "11.1.106"
+deps.iris = "1.7.6+1.20.1"
+deps.modmenu = "7.2.2"
+deps.fabric-api = "0.90.0+1.20.1"
+
+
+[fabric."1.21.4"]
+deps.minecraft = "1.21.4"
+
+deps.cloth_config = "17.0.142"
+deps.iris = "1.8.8+1.21.4"
+deps.modmenu = "13.0.3"
+deps.fabric-api = "0.112.2+1.21.4"
+
+[fabric."1.21.5"]
+deps.minecraft = "1.21.5"
+deps.cloth_config = "18.0.145"
+deps.iris = "1.8.11+1.21.5"
+deps.modmenu = "14.0.0-rc.2"
+deps.fabric-api = "0.119.2+1.21.5"
+
+[fabric."1.21.6"]
+deps.minecraft = "1.21.6"
+deps.cloth_config = "19.0.146"
+deps.iris = "1.9.6+1.21.8"
+deps.modmenu = "15.0.0-beta.1"
+deps.fabric-api = "0.127.1+1.21.6"
+
+[fabric."1.21.8"]
+deps.minecraft = "1.21.8"
+deps.cloth_config = "19.0.146"
+deps.iris = "1.9.6+1.21.8"
+deps.modmenu = "15.0.0-beta.1"
+deps.fabric-api = "0.127.1+1.21.6"
+
+publish.additionalVersions = ["1.21.6", "1.21.7"]
+
+[fabric."1.21.10"]
+deps.minecraft = "1.21.10"
+deps.cloth_config = "20.0.148"
+deps.iris = "1.9.7+1.21.10"
+deps.modmenu = "16.0.0"
+deps.fabric-api = "0.138.4+1.21.10"
+
+[fabric."1.21.11"]
+deps.minecraft = "1.21.11"
+deps.cloth_config = "21.11.151"
+deps.iris = "1.10.2+1.21.11"
+deps.modmenu = "17.0.0-alpha.1"
+deps.fabric-api = "0.139.4+1.21.11"
+
+[fabric."26.1"]
+deps.minecraft = "26.1"
+deps.cloth_config = "26.1.154"
+deps.iris = "1.10.9+26.1"
+deps.modmenu = "18.0.0-alpha.8"
+deps.fabric-api = "0.144.3+26.1"
+
+publish.additionalVersions = ["26.1.1"]
+#publish.additionalVersions = ["26.1.1", "26.1"]
+
+#[fabric."26.1.2"]
+#deps.minecraft = "26.1.2"
+#deps.fabric-api = "0.146.1+26.1.2"
+#deps.modmenu = "18.0.0-alpha.8"
+#publish.additionalVersions = ["26.1.1", "26.1"]
+
+[forge]
+
+[forge."1.20.1"]
+deps.minecraft = "1.20.1"
+deps.forge = "47.3.0"
+
+deps.cloth_config = "11.1.136"
+
+[neoforge]
+
+[neoforge."1.21.4"]
+deps.minecraft = "1.21.4"
+deps.cloth_config = "17.0.142"
+deps.iris = "1.8.8+1.21.4"
+deps.neoforge = "21.4.111-beta"
+deps.fabric-api = "0.112.2+1.21.4"
+
+[neoforge."1.21.5"]
+deps.minecraft = "1.21.5"
+deps.cloth_config = "18.0.145"
+deps.iris = "1.8.11+1.21.5"
+deps.neoforge = "21.6.5-beta"
+deps.fabric-api = "0.119.2+1.21.5"
+
+[neoforge."1.21.6"]
+deps.minecraft = "1.21.6"
+deps.cloth_config = "19.0.146"
+deps.iris = "1.9.6+1.21.8"
+deps.neoforge = "21.6.5-beta"
+deps.fabric-api = "0.127.1+1.21.6"
+
+[neoforge."1.21.8"]
+deps.minecraft = "1.21.8"
+deps.cloth_config = "19.0.146"
+deps.iris = "1.9.6+1.21.8"
+deps.neoforge = "21.6.5-beta"
+deps.fabric-api = "0.127.1+1.21.6"
+
+publish.additionalVersions = ["1.21.6", "1.21.7"]
+
+[neoforge."1.21.10"]
+deps.minecraft = "1.21.10"
+deps.cloth_config = "20.0.148"
+deps.iris = "1.9.7+1.21.10"
+deps.neoforge = "21.10.64"
+#deps.fabric-api = "0.138.4+1.21.10"
+
+[neoforge."1.21.11"]
+deps.minecraft = "1.21.11"
+deps.cloth_config = "21.11.151"
+deps.iris = "1.10.2+1.21.11"
+deps.neoforge = "21.11.6-beta"
+#deps.fabric-api = "0.134.0+1.21.11"
+
+# TODO: Should be 26.1.2
+[neoforge."26.1"]
+deps.minecraft = "26.1"
+deps.cloth_config = "26.1.154"
+deps.iris = "1.10.9+26.1"
+deps.neoforge = "26.1.0.5-beta"
+#deps.fabric-api = "0.144.3+26.1"
+
+publish.additionalVersions = ["26.1.1"]
+#publish.additionalVersions = ["26.1.1", "26.1"]
+
+#[neoforge."26.1.2"]
+#deps.minecraft = "26.1.2"
+#deps.neoforge = "26.1.2.29-beta"
+#publish.additionalVersions = ["26.1.1", "26.1"]

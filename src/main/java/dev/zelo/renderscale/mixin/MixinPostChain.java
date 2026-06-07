@@ -1,4 +1,4 @@
-//? <= 1.21.4 {
+//? <= 1.21.1 {
 /*package dev.zelo.renderscale.mixin;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -35,7 +35,5 @@ public abstract class MixinPostChain {
     private void onUpdateOrthoMatrix(CallbackInfo ci) {
         this.shaderOrthoMatrix = this.shaderOrthoMatrix.scale((float) renderScale$inverseScale(), (float) renderScale$inverseScale(), 1.0F);
     }
-
-    // TODO: @ModifyArgs DOES NOT WORK!! WHY?
 }
 *///?}

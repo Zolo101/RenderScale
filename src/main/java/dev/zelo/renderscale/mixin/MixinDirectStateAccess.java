@@ -1,6 +1,6 @@
-//? >= 1.21.5 {
+//? >= 1.21.5 && < 1.21.11 {
 
-package dev.zelo.renderscale.mixin;
+/*package dev.zelo.renderscale.mixin;
 
 import com.mojang.blaze3d.opengl.DirectStateAccess;
 import dev.kikugie.fletching_table.annotation.MixinEnvironment;
@@ -36,4 +36,4 @@ public interface MixinDirectStateAccess {
 //            boolean useStencil
 //    );
 }
-//?}
+*///?}

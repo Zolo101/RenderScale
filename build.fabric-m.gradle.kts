@@ -3,30 +3,45 @@ plugins {
     id("net.fabricmc.fabric-loom")
 }
 
+stonecutter {
+    val (version, loader) = current.project.split('-', limit = 2)
+    properties.tags(version, loader)
+
+    replacements.string(current.parsed >= "1.21.11") {
+        replace("ResourceLocation", "Identifier")
+        replace("location()", "identifier()")
+    }
+    replacements.string(current.parsed >= "26.1.2") {
+        replace("FabricDataOutput", "FabricPackOutput")
+    }
+}
+
 platform {
-    loader = "fabric"
+    loader = "fabric-m"
     dependencies {
-        // TODO: Remove minecraft dependency? Sodium & Iris do it
         required("minecraft") {
-//            versionRange = "${prop("deps.minecraft")},${prop("publish.additionalVersions")}"
-            versionRange = ">=26.1-"
+            fabricLikeVersionRange = prop("deps.minecraft")
         }
         required("fabric-api") {
             slug("fabric-api")
-            versionRange = ">=${prop("deps.fabric-api")}"
+            fabricLikeVersionRange = ">=${prop("deps.fabric-api")}"
         }
         required("fabricloader") {
-            versionRange = ">=${libs.fabric.loader.get().version}"
+            fabricLikeVersionRange = ">=${prop("deps.fabric-loader")}"
         }
         required("cloth-config") {
             slug("cloth-config")
-            versionRange = ">=${prop("deps.cloth_config")}"
+            fabricLikeVersionRange = ">=${prop("deps.cloth_config")}"
         }
         optional("iris") {
 //            slug("iris")
-            versionRange = ">=${prop("deps.iris")}"
+            fabricLikeVersionRange = ">=${prop("deps.iris")}"
         }
         optional("modmenu") {}
+
+        incompatible("resolutioncontrol-plus-plus") {}
+        incompatible("resolutioncontrol-plus") {}
+        incompatible("resolutioncontrol") {}
     }
 }
 
@@ -40,18 +55,18 @@ loom {
         programArgs("--username=Dev")
         configName = "Fabric Client"
     }
-//    runs.named("server") {
-//        server()
-//        ideConfigGenerated(true)
-//        runDir = "run/"
-//        environment = "server"
-//        configName = "Fabric Server"
-//    }
+    runs.named("server") {
+        server()
+        ideConfigGenerated(true)
+        runDir = "run/"
+        environment = "server"
+        configName = "Fabric Server"
+    }
 }
 
 fabricApi {
     configureDataGeneration {
-        outputDirectory = file("${rootDir}/versions/datagen/${stonecutter.current.version.split("-")[0]}/src/main/generated")
+        outputDirectory = file("${rootDir}/versions/datagen/${sc.current.version.split("-")[0]}/src/main/generated")
         client = true
     }
 }
@@ -65,12 +80,11 @@ repositories {
 
 dependencies {
     minecraft("com.mojang:minecraft:${prop("deps.minecraft")}")
-
-    implementation(libs.fabric.loader)
+    implementation("net.fabricmc:fabric-loader:${prop("deps.fabric-loader")}")
+//    implementation(libs.moulberry.mixinconstraints)
+//    include(libs.moulberry.mixinconstraints)
     implementation("net.fabricmc.fabric-api:fabric-api:${prop("deps.fabric-api")}")
-
-    implementation(libs.moulberry.mixinconstraints)
-    include(libs.moulberry.mixinconstraints)
+//    localRuntime("com.terraformersmc:modmenu:${prop("deps.modmenu")}")
     implementation("com.terraformersmc:modmenu:${prop("deps.modmenu")}")
 
     // config API for mod menu
@@ -80,13 +94,5 @@ dependencies {
 
     //    modLocalRuntime("maven.modrinth:sodium:${property("deps.sodium")}-fabric")
     //    modLocalRuntime("maven.modrinth:iris:${property("deps.iris")}-fabric")
-//    ("maven.modrinth:sodium:${property("deps.sodium")}-fabric")
     compileOnly("maven.modrinth:iris:${property("deps.iris")}-fabric")
-}
-
-stonecutter {
-    replacements.string(current.parsed >= "1.21.11") {
-        replace("ResourceLocation", "Identifier")
-        replace("location()", "identifier()")
-    }
 }

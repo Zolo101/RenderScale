@@ -1,5 +1,7 @@
+//~ if >= 1.21.11 'AutoConfig' -> 'AutoConfigClient' {
 //? neoforge {
-/*package dev.zelo.renderscale.platform.neoforge;
+/*
+package dev.zelo.renderscale.platform.neoforge;
 
 import dev.zelo.renderscale.Constants;
 import dev.zelo.renderscale.RenderScale;
@@ -46,7 +48,17 @@ public class NeoforgeClientEntrypoint {
         return AutoConfigClient.getConfigScreen(RenderScaleConfig.class, parent).get();
     }
 
-    public void onWorldRenderStart(RenderLevelStageEvent.AfterLevel event) {
+    //? >= 1.21.10 {
+    /^public void onWorldRenderStart(RenderLevelStageEvent.AfterLevel event) {
+//        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
+        if (!RenderScale.getInstance().hasRun) {
+            RenderScale.getInstance().resizeRenderTarget();
+            RenderScale.getInstance().hasRun = true;
+        }
+//        }
+    }
+    ^///? } else {
+    public void onWorldRenderStart(RenderLevelStageEvent event) {
 //        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
             if (!RenderScale.getInstance().hasRun) {
                 RenderScale.getInstance().resizeRenderTarget();
@@ -54,6 +66,7 @@ public class NeoforgeClientEntrypoint {
             }
 //        }
     }
+    //? }
 
     public void onClientTickEnd(ClientTickEvent.Post event) {
         if (Minecraft.getInstance().level == null && RenderScale.getInstance().hasRun) {
@@ -94,3 +107,4 @@ public class NeoforgeClientEntrypoint {
 
 }
 *///?}
+//~}

@@ -3,23 +3,33 @@ plugins {
     id("net.neoforged.moddev")
 }
 
+stonecutter {
+    val (version, loader) = current.project.split('-', limit = 2)
+    properties.tags(version, loader)
+
+    replacements.string(current.parsed >= "1.21.11") {
+        replace("ResourceLocation", "Identifier")
+        replace("location()", "identifier()")
+    }
+}
+
 platform {
     loader = "neoforge"
     dependencies {
         required("minecraft") {
-            forgeVersionRange = "[${prop("deps.minecraft")}]"
+            forgeLikeVersionRange = "[${prop("deps.minecraft")}]"
         }
         required("neoforge") {
-            forgeVersionRange = "[1,)"
+            forgeLikeVersionRange = "[1,)"
         }
         // WHY is it cloth_config in forge but cloth-config in fabric?????
         required("cloth_config") {
-//            slug("cloth_config")
-            forgeVersionRange = "[${prop("deps.cloth_config")},)"
+            slug("cloth_config")
+            forgeLikeVersionRange = "[${prop("deps.cloth_config")},)"
         }
         optional("iris") {
 //            slug("iris")
-            forgeVersionRange = "[${prop("deps.iris")},)"
+            forgeLikeVersionRange = "[${prop("deps.iris")},)"
         }
 
         incompatible("resolutioncontrol-plus-plus") {}
@@ -30,7 +40,7 @@ platform {
 
 neoForge {
     version = property("deps.neoforge") as String
-    accessTransformers.from(rootProject.file("src/main/resources/aw/${stonecutter.current.version}.cfg"))
+    accessTransformers.from(rootProject.file("src/main/resources/aw/${sc.current.version}.cfg"))
     validateAccessTransformers = true
 
     if (hasProperty("deps.parchment")) parchment {
@@ -43,13 +53,13 @@ neoForge {
         register("client") {
             client()
             gameDirectory = file("run/")
-            ideName = "NeoForge Client (${stonecutter.active?.version})"
+            ideName = "NeoForge Client (${sc.active?.version})"
             programArgument("--username=Dev")
         }
 //        register("server") {
 //            server()
 //            gameDirectory = file("run/")
-//            ideName = "NeoForge Server (${stonecutter.active?.version})"
+//            ideName = "NeoForge Server (${sc.active?.version})"
 //        }
     }
 
@@ -68,8 +78,8 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.moulberry.mixinconstraints)
-    jarJar(libs.moulberry.mixinconstraints)
+//    implementation(libs.moulberry.mixinconstraints)
+//    jarJar(libs.moulberry.mixinconstraints)
 
     api("me.shedaniel.cloth:cloth-config-neoforge:${property("deps.cloth_config")}") {
         exclude("net.fabricmc.fabric-api")
@@ -80,11 +90,4 @@ dependencies {
 
 tasks.named("createMinecraftArtifacts") {
     dependsOn(tasks.named("stonecutterGenerate"))
-}
-
-stonecutter {
-    replacements.string(current.parsed >= "1.21.11") {
-        replace("ResourceLocation", "Identifier")
-        replace("location()", "identifier()")
-    }
 }

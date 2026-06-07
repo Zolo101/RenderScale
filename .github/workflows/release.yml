@@ -8,15 +8,47 @@ on:
 permissions:
   contents: write
 
-env:
-  MODRINTH_API_TOKEN: ${{ secrets.MODRINTH_API_TOKEN }}
-  CURSEFORGE_API_TOKEN: ${{ secrets.CURSEFORGE_API_TOKEN }}
-  TEST_PUBLISHING_WITH_MR_STAGING: ${{ vars.TEST_PUBLISHING_WITH_MR_STAGING }}
-  ENABLE_PUBLISHING: ${{ vars.ENABLE_PUBLISHING }}
-
 jobs:
+  validate:
+    name: Validate Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag matches version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION=$(grep '^mod\.version' stonecutter.properties.toml | cut -d'"' -f2)
+          CHANNEL_TAG=$(grep '^mod\.channel_tag' stonecutter.properties.toml | cut -d'"' -f2)
+          FULL_VERSION="${VERSION}${CHANNEL_TAG}"
+
+          echo "Validating tag '$TAG' against version '$FULL_VERSION'..."
+          if [[ "$TAG" != "$FULL_VERSION" ]]; then
+            echo "::error::Tag '$TAG' does not match version '$FULL_VERSION' in gradle.properties."
+
+            if gh release view "$TAG" &>/dev/null; then
+              echo "Deleting GitHub release for $TAG..."
+              gh release delete "$TAG" -y
+            fi
+
+            git push origin ":refs/tags/$TAG"
+            exit 1
+          fi
+          echo "✓ Tag matches version."
+
   build:
+    needs: validate
     uses: ./.github/workflows/build_reusable.yml
+    with:
+      release: true
 
   prepare:
     name: Prepare Release
@@ -26,7 +58,7 @@ jobs:
       contents: write
 
     outputs:
-      publish_github: ${{ steps.read-props.outputs.publish_github }}
+      publish_github: ${{ steps.check.outputs.publish_github }}
 
     steps:
       - name: Checkout repository
@@ -40,46 +72,19 @@ jobs:
           sed -i "s|%%%repo_url%%%|${REPO_URL}|g" cliff.toml
 
       - name: Generate changelog with git-cliff
-        id: cliff
         uses: orhun/git-cliff-action@v4
         with:
           args: --latest --strip header --output CHANGELOG.md
           version: 'v2.10.1'
 
-      - name: Read gradle.properties values
-        id: read-props
+      - name: Check GitHub releases toggle
+        id: check
         run: |
-          VERSION=$(grep '^mod.version=' gradle.properties | cut -d'=' -f2)
-          CHANNEL_TAG=$(grep '^mod.channel_tag=' gradle.properties | cut -d'=' -f2)
-          PUBLISH_GITHUB=$(grep '^publish.github=' gradle.properties | cut -d'=' -f2 || echo "false")
-          FULL_VERSION="${VERSION}${CHANNEL_TAG}"
-
-          echo "mod.version=$VERSION"
-          echo "mod.channel_tag=$CHANNEL_TAG"
-          echo "Combined version=$FULL_VERSION"
-
-          echo "publish_github=$PUBLISH_GITHUB" >> "$GITHUB_OUTPUT"
-          echo "full_version=$FULL_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Validate tag matches version
-        run: |
-          TAG="${GITHUB_REF_NAME}"
-          FULL_VERSION="${{ steps.read-props.outputs.full_version }}"
-
-          echo "Validating tag '$TAG' against version '$FULL_VERSION'..."
-          if [[ "$TAG" != "$FULL_VERSION" ]]; then
-            echo "::error::Tag '$TAG' does not match version '$FULL_VERSION' in gradle.properties."
-            echo "Deleting tag and release..."
-
-            if gh release view "$TAG" &>/dev/null; then
-              echo "Deleting GitHub release for $TAG..."
-              gh release delete "$TAG" -y
-            fi
-
-            git push origin ":refs/tags/$TAG"
-            exit 1
+          if [[ "${{ vars.PUB_GITHUB_RELEASES }}" == "true" ]]; then
+            echo "publish_github=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish_github=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "✓ Tag matches version."
 
       - name: Upload changelog
         uses: actions/upload-artifact@v4
@@ -141,14 +146,32 @@ jobs:
               gh release delete-asset "$TAG" "$NAME" -y || true
               gh release upload "$TAG" "$FILE" --clobber
             done
-           fi
-
+          fi
 
   platform-release:
     name: Release to Platforms
     runs-on: ubuntu-latest
-    needs: [ prepare ]
+    needs: prepare
     continue-on-error: true
+
+    env:
+      MOD_IS_RELEASE: true
+      PUB_DRY_RUN: ${{ vars.PUB_DRY_RUN }}
+      PUB_MODS_ENABLE: ${{ vars.PUB_MODS_ENABLE }}
+      PUB_MAVEN_ENABLE: ${{ vars.PUB_MAVEN_ENABLE }}
+      PUB_MAVEN_CENTRAL_ENABLE: ${{ vars.PUB_MAVEN_CENTRAL_ENABLE }}
+      PUB_MAVEN_CENTRAL_SNAPSHOTS: ${{ vars.PUB_MAVEN_CENTRAL_SNAPSHOTS }}
+      PUB_MODRINTH_STAGING: ${{ vars.PUB_MODRINTH_STAGING }}
+      PUB_MODRINTH_PROJECT_ID: ${{ vars.PUB_MODRINTH_PROJECT_ID }}
+      PUB_CURSEFORGE_PROJECT_ID: ${{ vars.PUB_CURSEFORGE_PROJECT_ID }}
+      PUB_MODRINTH_TOKEN: ${{ secrets.PUB_MODRINTH_TOKEN }}
+      PUB_CURSEFORGE_TOKEN: ${{ secrets.PUB_CURSEFORGE_TOKEN }}
+      PUB_SIGNING_KEY: ${{ secrets.PUB_SIGNING_KEY }}
+      PUB_SIGNING_ID: ${{ secrets.PUB_SIGNING_ID }}
+      PUB_SIGNING_PASSWORD: ${{ secrets.PUB_SIGNING_PASSWORD }}
+      PUB_MAVEN_CENTRAL_USERNAME: ${{ secrets.PUB_MAVEN_CENTRAL_USERNAME }}
+      PUB_MAVEN_CENTRAL_PASSWORD: ${{ secrets.PUB_MAVEN_CENTRAL_PASSWORD }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -189,5 +212,4 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Publish to Platforms
-        run: |
-          ./gradlew publishMods --stacktrace
+        run: ./gradlew publishMods --stacktrace

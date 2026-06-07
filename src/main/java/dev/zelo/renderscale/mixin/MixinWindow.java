@@ -40,7 +40,7 @@ public abstract class MixinWindow {
 
     // TODO: Is this neoforge only?
     @ModifyReturnValue(method = "getGuiScale", at = @At("RETURN"))
-    //? >= 1.21.6 {
+    //? >= 1.21.5 {
     private int renderScale$modifyGuiScale(int original) {
     //?} else
     //private double renderScale$modifyGuiScale(double original) {
@@ -48,6 +48,7 @@ public abstract class MixinWindow {
         return RenderScale.getInstance() == null ? original : (int) (original * RenderScale.getInstance().getCurrentScaleFactor());
     }
 
+    // i think this has to do with mixin extras, its not mixing in this
     @Inject(method = "onFramebufferResize", at = @At("RETURN"))
     private void renderScale$onFramebufferResize(long window, int framebufferWidth, int framebufferHeight, CallbackInfo ci) {
         Constants.LOG.info("Size changed to {}x{} {}x{} {}x{}",

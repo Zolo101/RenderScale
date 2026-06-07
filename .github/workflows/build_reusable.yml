@@ -1,6 +1,11 @@
 name: reusable-build
 on:
   workflow_call:
+    inputs:
+      release:
+        description: "Whether this is a release build"
+        type: boolean
+        default: false
     outputs:
       artifact-name:
         description: "Name of the uploaded build artifact"
@@ -13,6 +18,9 @@ jobs:
     outputs:
       artifact-name: ${{ steps.upload.outputs.artifact-name }}
 
+    env:
+      MOD_IS_RELEASE: ${{ inputs.release }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,7 +30,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: 25
           distribution: 'microsoft'
 
       - name: Setup Gradle
@@ -44,6 +52,7 @@ jobs:
         run: ./gradlew buildAndCollect --no-daemon
 
       - name: Upload artifacts
+        id: upload
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts

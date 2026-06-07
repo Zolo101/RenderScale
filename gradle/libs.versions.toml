@@ -1,9 +1,9 @@
 [versions]
-stonecutter = "0.9"
+stonecutter = "0.9.2"
 stonecutter-postprocess = "2.1-beta.8"
 mod-publish = "1.1.0"
 dotenv-gradle = "4.0.0"
-fabric-loom = "1.15-SNAPSHOT"
+fabric-loom = "1.16-SNAPSHOT"
 neoforge-moddev = "2.0.141"
 foojay = "1.0.0"
 #fabric-loader = "0.16.14"
@@ -14,15 +14,27 @@ fletching-table = "0.1.0-alpha.22"
 moulberry-mixinconstraints = "1.1.0"
 vanniktech-maven-publish = "0.35.0"
 mixin = "0.8.5"
+serialization-json = "1.7.3"
+serialization-toml = "0.6.0"
+
+# TODO: There is a chance this is causing major issues in normal mixins (1.20.1 fabric when resizing window)
+# for forge, since modern FABRIC and NEOFORGE already have this
+#mixinextras = "0.5.3"
 
 [libraries]
 kikugie-postprocess = { module = "dev.kikugie:postprocess", version.ref = "stonecutter-postprocess" }
 mod-publish-plugin = { module = "me.modmuss50:mod-publish-plugin", version.ref = "mod-publish" }
 kikugie-stonecutter = { module = "dev.kikugie:stonecutter", version.ref = "stonecutter" }
-fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+#fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 foojay-resolver = { module = "org.gradle.toolchains:foojay-resolver", version.ref = "foojay" }
 fletching-table = { module = "dev.kikugie:fletching-table", version.ref = "fletching-table" }
 moulberry-mixinconstraints = { module = "com.moulberry:mixinconstraints", version.ref = "moulberry-mixinconstraints" }
+vanniktech-maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "vanniktech-maven-publish" }
+serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization-json" }
+serialization-toml = { module = "dev.eav.tomlkt:tomlkt", version.ref = "serialization-toml" }
+# for forge
+#mixinextras-common = { module = "io.github.llamalad7:mixinextras-common", version.ref = "mixinextras" }
+#mixinextras-forge = { module = "io.github.llamalad7:mixinextras-forge", version.ref = "mixinextras" }
 
 [plugins]
 stonecutter = { id = "dev.kikugie.stonecutter", version.ref = "stonecutter" }

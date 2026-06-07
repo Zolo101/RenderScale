@@ -1,6 +1,7 @@
 package dev.zelo.renderscale.platform.fabric;
 //? fabric {
 //~ if >= 1.21.11 'AutoConfig' -> 'AutoConfigClient' {
+//~ if >= 1.21.10 'START' -> 'START_MAIN' {
 
 import dev.kikugie.fletching_table.annotation.fabric.Entrypoint;
 import dev.zelo.renderscale.RenderScale;
@@ -14,8 +15,14 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 /*import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 *///?}
 
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
-//import net.fabricmc.fabric.api.client.rendering.v1.world.LevelRenderEvents;
+// can they decide??
+//? >= 26 {
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+//?} else >= 1.21.10 {
+/*import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+*///?} else
+//import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+
 import net.minecraft.client.KeyMapping;
 
 import org.lwjgl.glfw.GLFW;
@@ -40,28 +47,12 @@ public class FabricClientEntrypoint implements ClientModInitializer {
         /*keyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.renderscale.options", GLFW.GLFW_KEY_O, /^? >= 1.21.9 {^/ category /^?} else {^/ /^"key.renderscale.category" ^//^?}^/));
          *///?}
 
-        WorldRenderEvents.START_MAIN.register(worldRenderContext -> {
+        /*? >= 26 {*/ LevelRenderEvents /*?} else {*/ /*WorldRenderEvents *//*?}*/.START_MAIN.register(worldRenderContext -> {
             if (!RenderScale.getInstance().hasRun) {
                 RenderScale.getInstance().resizeRenderTarget();
                 RenderScale.getInstance().hasRun = true;
             }
         });
-
-//        //? <= 1.21.6 {
-//        /*WorldRenderEvents.START.register(worldRenderContext -> {
-//            if (!RenderScale.getInstance().hasRun) {
-//                RenderScale.getInstance().resizeRenderTarget();
-//                RenderScale.getInstance().hasRun = true;
-//            }
-//        });
-//        *///?} else {
-//        LevelRenderEvents.START_MAIN.register(levelRenderContext -> {
-//            if (!RenderScale.getInstance().hasRun) {
-//                RenderScale.getInstance().resizeRenderTarget();
-//                RenderScale.getInstance().hasRun = true;
-//            }
-//        });
-//        //?}
 
 
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -70,10 +61,14 @@ public class FabricClientEntrypoint implements ClientModInitializer {
             }
 
             while (keyBinding.consumeClick()) {
+                //? > 26.1 {
+//                minecraft.gui.setScreen(AutoConfigClient.getConfigScreen(RenderScaleConfig.class, minecraft.gui.screen()).get());
+                //?} else
                 minecraft.setScreen(AutoConfigClient.getConfigScreen(RenderScaleConfig.class, minecraft.screen).get());
             }
         });
     }
 }
+//~}
 //~}
 //?}

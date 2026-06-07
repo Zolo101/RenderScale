@@ -51,3 +51,6 @@ bin/
 .idea/
 !.idea/icon.png
 !.idea/icon.svg
+!.idea/externalDependencies.xml
+!.idea/runConfigurations/Run_Active_Client.xml
+!.idea/runConfigurations/Run_Active_Server.xml

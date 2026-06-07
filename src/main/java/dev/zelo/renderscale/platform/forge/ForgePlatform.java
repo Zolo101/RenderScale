@@ -18,10 +18,10 @@ public class ForgePlatform implements Platform {
 		return ModLoader.FORGE;
 	}
 
-	@Override
-	public String mcVersion() {
-		return "";
-	}
+//	@Override
+//	public String mcVersion() {
+//		return "";
+//	}
 
 	@Override
 	public boolean isDevelopmentEnvironment() {
