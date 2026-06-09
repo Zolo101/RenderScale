@@ -41,18 +41,21 @@ public class RenderScaleConfig implements ConfigData {
     }
 
     public float getScale() {
+        // To avoid 0x0 crashes if the user FOR SOME REASON puts 0 as the scale
+        float safeScale = Math.max(0.01f, scale);
+
         //? !forge {
         if (RenderScale.PLATFORM.isModLoaded("iris")) {
             if (IrisApi.getInstance().isShaderPackInUse() && irisScale > 0.0f) {
                 return irisScale;
             } else {
-                return scale;
+                return safeScale;
             }
         } else {
-            return scale;
+            return safeScale;
         }
         //?} else {
-         /*return scale;
+         /*return safeScale;
         *///?}
     }
 

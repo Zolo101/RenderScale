@@ -224,9 +224,7 @@ public class RenderScale {
     }
 
     public int clamp(int number, int min, int max) {
-        if (number < min) return min;
-        if (number > max) return max;
-        return number;
+        return Math.max(min, Math.min(number, max));
     }
 
     private void resize(@Nullable RenderTarget renderTarget) {
