@@ -91,7 +91,7 @@ public class CommonClass {
         Window window = client.getWindow();
         if (renderTarget == null) {
             this.shouldScale = true;
-            renderTarget = new MainTarget(window.getWidth(), window.getHeight());
+            renderTarget = new MainTarget(Math.max(1, window.getWidth()), Math.max(1, window.getHeight()));
         }
 
         this.shouldScale = shouldScale;
@@ -106,7 +106,7 @@ public class CommonClass {
             client.getMainRenderTarget().bindWrite(true);
 
             // TODO: Support fabulous graphics. Right now disableBlend = true shows the other passes but messes up the main target
-            renderTarget.blitToScreen(window.getWidth(), window.getHeight(), false);
+            renderTarget.blitToScreen(Math.max(1, window.getWidth()), Math.max(1, window.getHeight()), false);
         }
     }
 
@@ -129,7 +129,9 @@ public class CommonClass {
         shouldScale = true;
 
         Window window = client.getWindow();
-        renderTarget.resize(window.getWidth(), window.getHeight(), Minecraft.ON_OSX);
+        int width = Math.max(1, window.getWidth());
+        int height = Math.max(1, window.getHeight());
+        renderTarget.resize(width, height, Minecraft.ON_OSX);
 
         shouldScale = prev;
     }
@@ -141,9 +143,11 @@ public class CommonClass {
         shouldScale = true;
 
         Window window = client.getWindow();
+        int width = Math.max(1, window.getWidth());
+        int height = Math.max(1, window.getHeight());
 
         for (RenderTarget target : postChain.fullSizedTargets) {
-            target.resize(window.getWidth(), window.getHeight(), Minecraft.ON_OSX);
+            target.resize(width, height, Minecraft.ON_OSX);
         }
 
         shouldScale = prev;
