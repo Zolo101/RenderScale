@@ -23,6 +23,7 @@ mixinextras = "0.5.4"
 
 [libraries]
 kikugie-postprocess = { module = "dev.kikugie:postprocess", version.ref = "stonecutter-postprocess" }
+dotenv-gradle = { module = "co.uzzu.dotenv:gradle", version.ref = "dotenv-gradle" }
 mod-publish-plugin = { module = "me.modmuss50:mod-publish-plugin", version.ref = "mod-publish" }
 kikugie-stonecutter = { module = "dev.kikugie:stonecutter", version.ref = "stonecutter" }
 #fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }

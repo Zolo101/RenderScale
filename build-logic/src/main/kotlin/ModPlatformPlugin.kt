@@ -1,5 +1,6 @@
 @file:Suppress("unused", "DuplicatedCode")
 
+import co.uzzu.dotenv.gradle.DotEnvRoot
 import dev.kikugie.fletching_table.extension.FletchingTableExtension
 import dev.kikugie.stonecutter.StonecutterExperimentalAPI
 import dev.kikugie.stonecutter.build.StonecutterBuildExtension
@@ -28,7 +29,11 @@ val Project.sc: StonecutterBuildExtension
 @OptIn(StonecutterExperimentalAPI::class)
 fun Project.prop(name: String): String = (project.sc.properties.get<String>(name))
 
-fun Project.env(variable: String): String? = providers.environmentVariable(variable).orNull
+fun Project.env(variable: String): String? =
+    providers.environmentVariable(variable).orNull
+        ?: extensions.findByType<DotEnvRoot>()?.fetchOrNull(variable)
+
+fun Project.env(vararg variables: String): String? = variables.firstNotNullOfOrNull(::env)
 
 fun Project.envTrue(variable: String): Boolean = env(variable)?.toDefaultLowerCase() == "true"
 
@@ -134,10 +139,20 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
     }
 
     private fun Project.configureProcessResources(ctx: Context) {
+        tasks.named("kspKotlin") {
+            dependsOn(tasks.named("stonecutterGenerate"))
+        }
+
         tasks.named<ProcessResources>("processResources") {
-            dependsOn(tasks.named("stonecutterGenerate"), "kspKotlin")
+            dependsOn("kspKotlin")
             filesMatching("*.mixins.json") {
                 expand("java" to "JAVA_${ctx.javaVersion.majorVersion}")
+            }
+            if (ctx.loader is Loader.Forge) {
+                from(rootProject.file("src/main/resources/aw/${ctx.currentMcVersion}.cfg")) {
+                    into("META-INF")
+                    rename { "accesstransformer.cfg" }
+                }
             }
             exclude(ctx.loader.excludedResources)
         }

@@ -24,6 +24,7 @@ repositories {
 
 dependencies {
     implementation(libs.kikugie.postprocess)
+    implementation(libs.dotenv.gradle)
     implementation(libs.kikugie.stonecutter)
     implementation(libs.mod.publish.plugin)
     implementation(libs.foojay.resolver)

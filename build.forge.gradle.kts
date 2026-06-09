@@ -24,19 +24,16 @@ platform {
             forgeLikeVersionRange.set("[1,)")
         }
         required("cloth_config") {
-            forgeLikeVersionRange = prop("deps.minecraft")
+            forgeLikeVersionRange = prop("deps.cloth_config")
         }
     }
 }
 
 legacyForge {
     version = "${property("deps.minecraft")}-${property("deps.forge")}"
-
+    accessTransformers.from(rootProject.file("src/main/resources/aw/${sc.current.version}.cfg"))
     validateAccessTransformers = true
 
-    accessTransformers.from(
-        rootProject.file("src/main/resources/aw/${sc.current.version}.cfg")
-    )
 
     runs {
         register("client") {
@@ -86,6 +83,11 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-config-forge:${property("deps.cloth_config")}") {
         exclude("net.fabricmc.fabric-api")
     }
+
+    // for testing and that
+    modRuntimeOnly("maven.modrinth:embeddium:0.3.31+mc1.20.1")
+    modRuntimeOnly("maven.modrinth:oculus:1.20.1-1.8.0")
+    modRuntimeOnly("maven.modrinth:create:mc1.20.1-6.0.8")
 }
 
 sourceSets {
