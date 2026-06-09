@@ -1,5 +1,6 @@
 {
   "package": "dev.zelo.renderscale.mixin",
+  "refmap": "renderscale.mixins.refmap.json",
   "required": true,
   "minVersion": "0.8",
   "compatibilityLevel": "${java}",
