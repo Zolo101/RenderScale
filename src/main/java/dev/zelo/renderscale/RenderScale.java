@@ -35,7 +35,11 @@ import dev.zelo.renderscale.platform.fabric.FabricPlatform;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import java.util.OptionalInt;
+//? < 26.2 {
+/*import java.util.OptionalInt;
+*///? } else
+import java.util.Optional;
+
 //?}
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
@@ -101,7 +105,10 @@ public class RenderScale {
     }
 
     public void setClientRenderTarget(RenderTarget renderTarget) {
-        client.mainRenderTarget = renderTarget;
+        //? < 26.2 {
+        /*client.mainRenderTarget = renderTarget;
+        *///? } else
+        client.gameRenderer.mainRenderTarget = renderTarget;
     }
 
     public void setShouldScale(boolean shouldScale) {
@@ -111,6 +118,8 @@ public class RenderScale {
         //ProfilerFiller profiler = RenderScale.client.getProfiler();
         profiler.push("renderscale_rescaling");
         //? >= 1.21.5 {
+        this.shouldScale = shouldScale;
+
         Window window = client.getWindow();
         int width = window.getWidth();
         int height = window.getHeight();
@@ -126,7 +135,10 @@ public class RenderScale {
         }
 
         if (clientRenderTarget == null) {
-            clientRenderTarget = client.getMainRenderTarget();
+            //? < 26.2 {
+            /*clientRenderTarget = client.getMainRenderTarget();
+            *///? } else
+            clientRenderTarget = client.gameRenderer.mainRenderTarget();
         }
 
         if (shouldScale) {
@@ -257,13 +269,19 @@ public class RenderScale {
     public void blitAndBlendToTexture(final RenderTarget input, final RenderTarget output, final FilterMode filter) {
         RenderSystem.assertOnRenderThread();
 
-        try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), OptionalInt.empty())) {
+        //? < 26.2 {
+        /*try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), OptionalInt.empty())) {
+        *///? } else
+        try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), Optional.empty())) {
             // Tracy blit is weird because I believe it's technically a debug pass.
             // However, it looks exactly the same as vanilla, so I'm assuming it's fine.
             renderPass.setPipeline(RenderPipelines.TRACY_BLIT);
             RenderSystem.bindDefaultUniforms(renderPass);
             renderPass.bindTexture("InSampler", input.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
-            renderPass.draw(0, 3);
+            //? < 26.2 {
+            /*renderPass.draw(0, 3);
+            *///?} else
+            renderPass.draw(3, 1, 0, 0);
         }
 
         // copying depth doesn't seem to do anything?

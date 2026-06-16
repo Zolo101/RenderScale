@@ -1,6 +1,8 @@
 package dev.zelo.renderscale.mixin;
 
-//? >= 1.21.4 {
+//? < 26.2 {
+
+/*//? >= 1.21.4 {
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.framegraph.FramePass;
 import dev.kikugie.fletching_table.annotation.MixinEnvironment;
@@ -24,8 +26,8 @@ public abstract class MixinLevelRenderer {
     //? >= 1.21.4 {
     @Shadow private RenderTarget entityOutlineTarget;
     //?} else {
-    /*@Shadow private RenderTarget entityTarget;
-    *///?}
+    /^@Shadow private RenderTarget entityTarget;
+    ^///?}
 
     //? >= 1.21.4 {
     @Shadow @Final private Minecraft minecraft;
@@ -51,7 +53,7 @@ public abstract class MixinLevelRenderer {
     //?}
 
     //? forge {
-    /*@Inject(method = "initOutline", at = @At(value = "RETURN"))
+    /^@Inject(method = "initOutline", at = @At(value = "RETURN"))
     private void onLoadEntityOutlineShader(CallbackInfo ci) {
         RenderScale.getInstance().resizeMinecraftRenderTargetSize();
     }
@@ -61,5 +63,6 @@ public abstract class MixinLevelRenderer {
         if (entityTarget == null) return;
         RenderScale.getInstance().resizeMinecraftRenderTargetSize();
     }
-    *///?}
+    ^///?}
 }
+*///?}

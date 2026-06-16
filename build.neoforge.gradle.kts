@@ -17,24 +17,32 @@ platform {
     loader = "neoforge"
     dependencies {
         required("minecraft") {
-            forgeLikeVersionRange = "[${prop("deps.minecraft")}]"
+            forgeLikeVersionRange = prop("deps.minecraft")
         }
         required("neoforge") {
-            forgeLikeVersionRange = "[1,)"
+            forgeLikeVersionRange.set("[1,)")
         }
         // WHY is it cloth_config in forge but cloth-config in fabric?????
         required("cloth_config") {
             slug("cloth_config")
-            forgeLikeVersionRange = "[${prop("deps.cloth_config")},)"
+            forgeLikeVersionRange = prop("deps.cloth_config")
         }
         optional("iris") {
 //            slug("iris")
-            forgeLikeVersionRange = "[${prop("deps.iris")},)"
+            forgeLikeVersionRange = prop("deps.iris")
         }
 
-        incompatible("resolutioncontrol-plus-plus") {}
-        incompatible("resolutioncontrol-plus") {}
-        incompatible("resolutioncontrol") {}
+        incompatible("resolutioncontrol-plus-plus") {
+            forgeLikeVersionRange.set("[0,)")
+        }
+
+        incompatible("resolutioncontrol-plus") {
+            forgeLikeVersionRange.set("[0,)")
+        }
+
+        incompatible("resolutioncontrol") {
+            forgeLikeVersionRange.set("[0,)")
+        }
     }
 }
 
@@ -55,6 +63,11 @@ neoForge {
             gameDirectory = file("run/")
             ideName = "NeoForge Client (${sc.active?.version})"
             programArgument("--username=Dev")
+
+            jvmArgument("-Dmixin.debug=true")
+            jvmArgument("-Dmixin.debug.verbose=true")
+            jvmArgument("-Dmixin.debug.export=true")
+            jvmArgument("-Dmixin.checks.interfaces=true")
         }
 //        register("server") {
 //            server()

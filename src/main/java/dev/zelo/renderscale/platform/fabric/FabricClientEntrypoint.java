@@ -62,9 +62,9 @@ public class FabricClientEntrypoint implements ClientModInitializer {
 
             while (keyBinding.consumeClick()) {
                 //? > 26.1 {
-//                minecraft.gui.setScreen(AutoConfigClient.getConfigScreen(RenderScaleConfig.class, minecraft.gui.screen()).get());
+                minecraft.gui.setScreen(AutoConfigClient.getConfigScreen(RenderScaleConfig.class, minecraft.gui.screen()).get());
                 //?} else
-                minecraft.setScreen(AutoConfigClient.getConfigScreen(RenderScaleConfig.class, minecraft.screen).get());
+                //minecraft.setScreen(AutoConfigClient.getConfigScreen(RenderScaleConfig.class, minecraft.screen).get());
             }
         });
     }
