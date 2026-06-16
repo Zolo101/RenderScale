@@ -42,7 +42,7 @@ public class FabricClientEntrypoint implements ClientModInitializer {
         //? >= 1.21.9
         KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("renderscale", "category"));
         //? >= 26.1 {
-        keyBinding = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.renderscale.options", GLFW.GLFW_KEY_O, category));
+        keyBinding = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.renderscale.options", /*? < 26.2 {*/ /*GLFW.GLFW_KEY_O *//*?} else {*/ GLFW.GLFW_KEY_U /*?}*/, category));
         //?} else {
         /*keyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.renderscale.options", GLFW.GLFW_KEY_O, /^? >= 1.21.9 {^/ category /^?} else {^/ /^"key.renderscale.category" ^//^?}^/));
          *///?}
