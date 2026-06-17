@@ -19,7 +19,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+//import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -78,9 +78,9 @@ public class NeoforgeClientEntrypoint {
         }
     }
 
-    public static void onDatapackReload() {
+//    public static void onDatapackReload() {
 //        AutoConfigClient.getConfigHolder(RenderScaleConfig.class).load();
-    }
+//    }
 
     //? < 1.21.11
     //@EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
@@ -88,11 +88,11 @@ public class NeoforgeClientEntrypoint {
     @EventBusSubscriber(modid = Constants.MOD_ID, value = Dist.CLIENT)
 //    @EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public class EventHandler {
-        @SubscribeEvent
-        public static void registerReloadManager(AddClientReloadListenersEvent event) {
-            event.addListener(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "load_config"),
-                    (ResourceManagerReloadListener) c -> NeoforgeClientEntrypoint.onDatapackReload());
-        }
+//        @SubscribeEvent
+//        public static void registerReloadManager(AddClientReloadListenersEvent event) {
+//            event.addListener(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "load_config"),
+//                    (ResourceManagerReloadListener) c -> NeoforgeClientEntrypoint.onDatapackReload());
+//        }
 
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
