@@ -40,7 +40,7 @@ public abstract class MixinWindow {
 
     // TODO: Is this neoforge only?
     @ModifyReturnValue(method = "getGuiScale", at = @At("RETURN"))
-    //? >= 1.21.5 {
+    //? >= 1.21.6 {
     private int renderScale$modifyGuiScale(int original) {
     //?} else
     //private double renderScale$modifyGuiScale(double original) {

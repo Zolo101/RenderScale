@@ -19,7 +19,7 @@ import com.mojang.blaze3d.textures.FilterMode;
 import net.minecraft.client.renderer.RenderPipelines;
 //?}
 
-//? > 1.20.1
+//? > 1.21.1
 import net.minecraft.util.profiling.Profiler;
 
 //? fabric {
@@ -112,7 +112,7 @@ public class RenderScale {
     }
 
     public void setShouldScale(boolean shouldScale) {
-        //? > 1.20.1 {
+        //? > 1.21.1 {
         ProfilerFiller profiler = Profiler.get();
         //? } else
         //ProfilerFiller profiler = RenderScale.client.getProfiler();
@@ -252,7 +252,7 @@ public class RenderScale {
         int scaledWidth = clamp(width, 1, 65536);
         int scaledHeight = clamp(height, 1, 65536);
 
-        //? >= 1.21.4 {
+        //? >= 1.21.2 {
         renderTarget.resize(scaledWidth, scaledHeight);
         //?} else {
         /*renderTarget.resize(scaledWidth, scaledHeight, true);

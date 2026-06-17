@@ -1,15 +1,8 @@
 package dev.zelo.renderscale.mixin;
 
-//? < 26.2 {
+//? < 26.1 {
 
-/*//? >= 1.21.4 {
-import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
-import com.mojang.blaze3d.framegraph.FramePass;
-import dev.kikugie.fletching_table.annotation.MixinEnvironment;
-import net.minecraft.client.renderer.LevelTargetBundle;
-//?}
-
-import com.mojang.blaze3d.pipeline.RenderTarget;
+/*import com.mojang.blaze3d.pipeline.RenderTarget;
 import dev.kikugie.fletching_table.annotation.MixinEnvironment;
 import dev.zelo.renderscale.RenderScale;
 import net.minecraft.client.Minecraft;
@@ -23,13 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LevelRenderer.class)
 @MixinEnvironment(type = MixinEnvironment.Env.CLIENT)
 public abstract class MixinLevelRenderer {
-    //? >= 1.21.4 {
+    //? >= 1.21.2 {
     @Shadow private RenderTarget entityOutlineTarget;
     //?} else {
     /^@Shadow private RenderTarget entityTarget;
     ^///?}
 
-    //? >= 1.21.4 {
+    //? >= 1.21.2 {
     @Shadow @Final private Minecraft minecraft;
     // Fix for the entity outline shader
     // method is fabric
@@ -38,16 +31,14 @@ public abstract class MixinLevelRenderer {
 //    private static void onLoadEntityOutlineShader(CallbackInfo ci) {
 //        RenderScale.getInstance().resizeMinecraftRenderTargetSize();
 //    }
-    // TODO: Might be unnecessary for 26.1
     @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;importExternal(Ljava/lang/String;Ljava/lang/Object;)Lcom/mojang/blaze3d/resource/ResourceHandle;"))
     private void onRenderWorldBegin(CallbackInfo callbackInfo) {
         if (this.entityOutlineTarget != null) {
-            Minecraft instance = this.minecraft;
+            RenderTarget mainTarget = this.minecraft.getMainRenderTarget();
 
-            double s = RenderScale.getConfig().getScale();
-
-            entityOutlineTarget.width = (int) (instance.getWindow().getWidth() * s);
-            entityOutlineTarget.height = (int) (instance.getWindow().getHeight() * s);
+            if (this.entityOutlineTarget.width != mainTarget.width || this.entityOutlineTarget.height != mainTarget.height) {
+                this.entityOutlineTarget.resize(mainTarget.width, mainTarget.height);
+            }
         }
     }
     //?}
