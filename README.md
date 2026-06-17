@@ -36,22 +36,13 @@ Aims to be compatible with any mod, including Sodium, Iris, etc. However, there 
 
 # Supported Versions
 
-| Minecraft       | Fabric | NeoForge | Forge |
-|-----------------|--------|----------|-------|
-| 1.21.11 | ✅      | ✅       | 🚫    |
-| 1.21.6 - 1.21.10 | ✅      | 🕛 [4]        | 🚫    |
-| 1.21.5          | ✅      | ✅        | 🚫    |
-| 1.21.4          | ✅      | ✅        | 🚫    |
-| 1.21.2 - 1.21.3 | 🚫 [1] | 🚫       | 🚫    |
-| 1.21.0 - 1.21.1 | ✅ [3]  | ✅ [3]    | 🚫    |
-| 1.20.4 - 1.20.6 | 🚫 [1] | 🚫       | 🚫    |
-| 1.20.2 - 1.20.4 | 🚫 [2] | 🚫       | 🚫    |
-| 1.20.1          | 🚫 [2] | 🚫       | ✅     |
+| Minecraft        | Fabric | NeoForge | Forge |
+|------------------|--------|----------|-------|
+| 1.21.2 and above | ✅      | ✅        | 🚫    |
+| 1.21.0 - 1.21.1  | ✅ [1]  | ✅ [1]    | 🚫    |
+| 1.20.2 - 1.20.6  | 🚫 [2] | 🚫       | 🚫    |
+| 1.20.1           | ✅ [2]  | 🚫       | ✅     |
 
-[1] Available on [ResolutionControl++](https://modrinth.com/mod/resolution-control-plus-plus)
+[1] Does not support Fabulous graphics
 
-[2] Available on [ResolutionControl+](https://modrinth.com/mod/resolution-control-plus)
-
-[3] Currently does not support Fabulous graphics
-
-[4] soon...
+Check out the previous forks, [ResolutionControl++](https://modrinth.com/mod/resolution-control-plus-plus), [ResolutionControl+](https://modrinth.com/mod/resolution-control-plus), [ResolutionControl](https://github.com/juliand665/Resolution-Control) for older versions
