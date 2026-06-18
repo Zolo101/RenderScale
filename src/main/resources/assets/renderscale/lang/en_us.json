@@ -2,6 +2,8 @@
   "renderscale.name": "RenderScale",
   "text.autoconfig.renderscale.title": "RenderScale Options",
   "text.autoconfig.renderscale.option.scale": "Scale factor",
+  "text.autoconfig.renderscale.option.fsr": "Enable FSR 1 (Experimental)",
+  "text.autoconfig.renderscale.option.fsr.@Tooltip": "Results may vary depending on your hardware. Compare your FPS!",
   "text.autoconfig.renderscale.option.forceLinear": "Force linear scaling",
   "text.autoconfig.renderscale.option.irisScale": "Scale factor for shaders",
   "text.autoconfig.renderscale.option.irisScale.@Tooltip": "-1 to keep as same (default)",

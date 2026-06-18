@@ -1,14 +1,23 @@
 package dev.zelo.renderscale;
 
 import com.mojang.blaze3d.pipeline.MainTarget;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.zelo.renderscale.config.RenderScaleConfig;
 import dev.zelo.renderscale.platform.Platform;
 import me.shedaniel.autoconfig.ConfigHolder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.Nullable;
+
+//? > 26.1 {
+import com.mojang.blaze3d.PrimitiveTopology;
+import net.minecraft.client.renderer.BindGroupLayouts;
+//?}
 
 //? >= 1.21.5 && < 1.21.11
 //import dev.zelo.renderscale.accessors.GICommandEncoderThing;
@@ -35,10 +44,12 @@ import dev.zelo.renderscale.platform.fabric.FabricPlatform;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-//? < 26.2 {
-/*import java.util.OptionalInt;
-*///? } else
+//? > 26.1 {
 import java.util.Optional;
+//? } else
+//import java.util.OptionalInt;
+
+import static net.minecraft.client.renderer.RenderPipelines.GLOBALS_SNIPPET;
 
 //?}
 
@@ -49,13 +60,56 @@ import java.util.Optional;
 public class RenderScale {
     private static Minecraft client = Minecraft.getInstance();
 
-    // This is RenderScale's renderTarget
+    // This is RenderScale's renderTarget (scaled)
     @Nullable
     public RenderTarget renderTarget;
 
-    // This is Minecraft's renderTarget
+    // This is Minecraft's renderTarget (native res)
     @Nullable
     public RenderTarget clientRenderTarget;
+
+    @Nullable
+    private RenderTarget fsrIntermediateTarget;
+
+    //? >= 1.21.11 {
+    public static RenderPipeline FSR_EASU_PIPELINE = RenderPipelines.register(
+//            RenderPipeline.builder(new RenderPipeline.Snippet[]{GLOBALS_SNIPPET})
+            RenderPipeline.builder(GLOBALS_SNIPPET)
+                .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_easu"))
+//                .withVertexShader(Identifier.fromNamespaceAndPath("renderscale", "core/fsr_easu"))
+                .withVertexShader("core/screenquad")
+                .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/easu"))
+                //? 26.1 {
+                    /*.withSampler("InSampler")
+                    .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
+                    *///?} else {
+
+                .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
+                .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+                    //?}
+
+                .build()
+    );
+
+    public static RenderPipeline FSR_RCAS_PIPELINE = RenderPipelines.register(
+//            RenderPipeline.builder(new RenderPipeline.Snippet[]{GLOBALS_SNIPPET})
+            RenderPipeline.builder(GLOBALS_SNIPPET)
+                    .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_rcas"))
+//                .withVertexShader(Identifier.fromNamespaceAndPath("renderscale", "core/fsr_easu"))
+                    .withVertexShader("core/screenquad")
+                    .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/rcas"))
+                    //? 26.1 {
+                    /*.withSampler("InSampler")
+                    .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
+                    *///?} else {
+
+                    .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
+                    .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+                    //?}
+                    .build()
+    );
+    //?}
+
 
     private static RenderScale instance;
     private boolean shouldScale = false;
@@ -101,7 +155,12 @@ public class RenderScale {
     public void onResolutionChanged() {
         if (getWindow() == null) return;
 
+        ProfilerFiller profiler = getProfile();
+        profiler.push("renderscale_resize_targets");
+
         resizeRenderTarget();
+
+        profiler.pop();
     }
 
     public void setClientRenderTarget(RenderTarget renderTarget) {
@@ -111,11 +170,15 @@ public class RenderScale {
         client.gameRenderer.mainRenderTarget = renderTarget;
     }
 
-    public void setShouldScale(boolean shouldScale) {
+    public ProfilerFiller getProfile() {
         //? > 1.21.1 {
-        ProfilerFiller profiler = Profiler.get();
+        return Profiler.get();
         //? } else
-        //ProfilerFiller profiler = RenderScale.client.getProfiler();
+        //return RenderScale.client.getProfiler();
+    }
+
+    public void setShouldScale(boolean shouldScale) {
+        ProfilerFiller profiler = getProfile();
         profiler.push("renderscale_rescaling");
         //? >= 1.21.5 {
         this.shouldScale = shouldScale;
@@ -224,6 +287,7 @@ public class RenderScale {
 
     public void resizeRenderTarget() {
         resize(renderTarget);
+        resize(fsrIntermediateTarget);
         //? <= 1.21.1 {
         /*resize(client.levelRenderer.entityTarget());
 
@@ -269,19 +333,47 @@ public class RenderScale {
     public void blitAndBlendToTexture(final RenderTarget input, final RenderTarget output, final FilterMode filter) {
         RenderSystem.assertOnRenderThread();
 
-        //? < 26.2 {
+        //? < 1.21.11 {
         /*try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), OptionalInt.empty())) {
         *///? } else
-        try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), Optional.empty())) {
-            // Tracy blit is weird because I believe it's technically a debug pass.
-            // However, it looks exactly the same as vanilla, so I'm assuming it's fine.
-            renderPass.setPipeline(RenderPipelines.TRACY_BLIT);
-            RenderSystem.bindDefaultUniforms(renderPass);
-            renderPass.bindTexture("InSampler", input.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
-            //? < 26.2 {
-            /*renderPass.draw(0, 3);
-            *///?} else
-            renderPass.draw(3, 1, 0, 0);
+        if (getConfig().fsr) {
+            if (fsrIntermediateTarget == null) {
+                fsrIntermediateTarget = new MainTarget(output.width, output.height);
+            } else if (fsrIntermediateTarget.width != output.width || fsrIntermediateTarget.height != output.height) {
+                fsrIntermediateTarget.resize(output.width, output.height);
+            }
+
+            try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "FSR: EASU", fsrIntermediateTarget.getColorTextureView(), /*? > 26.1 {*/ Optional /*?} else {*/ /*OptionalInt *//*?}*/.empty())) {
+                renderPass.setPipeline(FSR_EASU_PIPELINE);
+                RenderSystem.bindDefaultUniforms(renderPass);
+                renderPass.bindTexture("InSampler", input.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
+                //? < 26.2 {
+                /*renderPass.draw(0, 3);
+                 *///?} else
+                renderPass.draw(3, 1, 0, 0);
+            }
+
+            try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "FSR: RCAS", output.getColorTextureView(), /*? > 26.1 {*/ Optional /*?} else {*/ /*OptionalInt *//*?}*/.empty())) {
+                renderPass.setPipeline(FSR_RCAS_PIPELINE);
+                RenderSystem.bindDefaultUniforms(renderPass);
+                renderPass.bindTexture("InSampler", fsrIntermediateTarget.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
+                //? < 26.2 {
+                /*renderPass.draw(0, 3);
+                 *///?} else
+                renderPass.draw(3, 1, 0, 0);
+            }
+        } else {
+            try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), /*? > 26.1 {*/ Optional /*?} else {*/ /*OptionalInt *//*?}*/.empty())) {
+                // Tracy blit is weird because I believe it's technically a debug pass.
+                // However, it looks exactly the same as vanilla, so I'm assuming it's fine.
+                renderPass.setPipeline(RenderPipelines.TRACY_BLIT);
+                RenderSystem.bindDefaultUniforms(renderPass);
+                renderPass.bindTexture("InSampler", input.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
+                //? < 26.2 {
+                /*renderPass.draw(0, 3);
+                 *///?} else
+                renderPass.draw(3, 1, 0, 0);
+            }
         }
 
         // copying depth doesn't seem to do anything?

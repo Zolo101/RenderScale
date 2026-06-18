@@ -19,6 +19,15 @@ public class RenderScaleConfig implements ConfigData {
     public float scale = 1.0f;
     public boolean forceLinear = false;
 
+    //? >= 1.21.11
+    @ConfigEntry.Gui.Tooltip()
+    public boolean fsr = false;
+
+//  double UltraQuality = 1.3; // (0.77)
+//  double Quality = 1.5;      // (0.67)
+//  double Balanced = 1.7;     // (0.59)
+//  double Performance = 2.0;  // (0.5)
+
     // TODO: Support oculus?
     //? !forge {
     @ConfigEntry.Category("iris")
@@ -59,8 +68,11 @@ public class RenderScaleConfig implements ConfigData {
         *///?}
     }
 
-    // yes -> linear, no -> nearest
+    // true -> linear, false -> nearest
     public boolean getFilter() {
-        return forceLinear || getScale() > 1.0;
+        //? >= 1.21.11 {
+        return fsr || forceLinear || getScale() > 1.0;
+        //?} else
+//        return forceLinear || getScale() > 1.0;
     }
 }
