@@ -38,7 +38,7 @@ stonecutter {
         // after here, it doesn't have to be the latest hotfix build
         // since we can be confident that hotfix versions won't break the mod
         match("26.1", "fabric", "neoforge") // and 26.1.1, 26.1.2
-        match("26.2", "fabric")
+        match("26.2", "fabric")//, "neoforge")
 
         // latest version always
         vcsVersion = "26.2-fabric"

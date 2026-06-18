@@ -36,12 +36,12 @@ Aims to be compatible with any mod, including Sodium, Iris, etc. However, there 
 
 # Supported Versions
 
-| Minecraft        | Fabric | NeoForge | Forge |
-|------------------|--------|----------|-------|
-| 1.21.2 and above | ✅      | ✅        | 🚫    |
-| 1.21.0 - 1.21.1  | ✅ [1]  | ✅ [1]    | 🚫    |
-| 1.20.2 - 1.20.6  | 🚫 [2] | 🚫       | 🚫    |
-| 1.20.1           | ✅ [2]  | 🚫       | ✅     |
+| Minecraft        | Fabric | NeoForge | Forge  |
+|------------------|--------|----------|--------|
+| 1.21.2 and above | ✅      | ✅        | 🚫     |
+| 1.21.0 - 1.21.1  | ✅ [1]  | ✅ [1]    | 🚫     |
+| 1.20.2 - 1.20.6  | 🚫     | 🚫       | 🚫     |
+| 1.20.1           | ✅ [1]  | 🚫       | ✅  [1] |
 
 [1] Does not support Fabulous graphics
 
