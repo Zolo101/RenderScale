@@ -1,8 +1,13 @@
 package dev.zelo.renderscale;
 
 import com.mojang.blaze3d.pipeline.MainTarget;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+//? >= 1.21.11 {
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.DepthTestFunction;
+
+import static net.minecraft.client.renderer.RenderPipelines.GLOBALS_SNIPPET;
+//?}
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -49,8 +54,6 @@ import java.util.Optional;
 //? } else
 //import java.util.OptionalInt;
 
-import static net.minecraft.client.renderer.RenderPipelines.GLOBALS_SNIPPET;
-
 //?}
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
@@ -72,14 +75,14 @@ public class RenderScale {
     private RenderTarget fsrIntermediateTarget;
 
     //? >= 1.21.11 {
-    public static RenderPipeline FSR_EASU_PIPELINE = RenderPipelines.register(
-//            RenderPipeline.builder(new RenderPipeline.Snippet[]{GLOBALS_SNIPPET})
+    public static RenderPipeline FSR_EASU_PIPELINE =
             RenderPipeline.builder(GLOBALS_SNIPPET)
                 .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_easu"))
-//                .withVertexShader(Identifier.fromNamespaceAndPath("renderscale", "core/fsr_easu"))
                 .withVertexShader("core/screenquad")
                 .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/easu"))
-                //? 26.1 {
+                .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                .withDepthWrite(false)
+                //? <= 26.1 {
                     /*.withSampler("InSampler")
                     .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
                     *///?} else {
@@ -88,17 +91,16 @@ public class RenderScale {
                 .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
                     //?}
 
-                .build()
-    );
+                .build();
 
-    public static RenderPipeline FSR_RCAS_PIPELINE = RenderPipelines.register(
-//            RenderPipeline.builder(new RenderPipeline.Snippet[]{GLOBALS_SNIPPET})
+    public static RenderPipeline FSR_RCAS_PIPELINE =
             RenderPipeline.builder(GLOBALS_SNIPPET)
                     .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_rcas"))
-//                .withVertexShader(Identifier.fromNamespaceAndPath("renderscale", "core/fsr_easu"))
                     .withVertexShader("core/screenquad")
                     .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/rcas"))
-                    //? 26.1 {
+                    .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                    .withDepthWrite(false)
+                    //? <= 26.1 {
                     /*.withSampler("InSampler")
                     .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
                     *///?} else {
@@ -106,8 +108,7 @@ public class RenderScale {
                     .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
                     .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
                     //?}
-                    .build()
-    );
+                    .build();
     //?}
 
 
