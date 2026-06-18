@@ -1,5 +1,7 @@
-# 1.3.9
+# 1.4.0-alpha.1
 
-Supports 26.2 including Vulkan
+Experimental FSR 1 support for 1.21.11 and above
 
-Added support for 1.21.2, 1.21.3
+Supports OpenGL & Vulkan
+
+Results may vary depending on your hardware. Compare your FPS!
