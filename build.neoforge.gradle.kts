@@ -24,7 +24,7 @@ platform {
         }
         // WHY is it cloth_config in forge but cloth-config in fabric?????
         required("cloth_config") {
-            slug("cloth_config")
+            slug("cloth-config")
             forgeLikeVersionRange = prop("deps.cloth_config")
         }
         optional("iris") {

@@ -59,7 +59,7 @@ fun Project.configureMavenPublishing(ctx: Context) {
 
 fun Project.configureModPublishing(ctx: Context) {
     val releaseType = ReleaseType.of(
-        ctx.channelTag.substringAfter('-').substringBefore('.').ifEmpty { "stable" })
+        ctx.modVersion.substringAfter('-').substringBefore('.').ifEmpty { "stable" })
 
     extensions.configure<ModPublishExtension>("publishMods") {
         val mrStaging = envTrue("PUB_MODRINTH_STAGING")

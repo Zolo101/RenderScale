@@ -2,9 +2,12 @@ package dev.zelo.renderscale;
 
 import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+
 //? >= 1.21.11 {
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
+
+//? 1.21.11
+//import com.mojang.blaze3d.platform.DepthTestFunction;
 
 import static net.minecraft.client.renderer.RenderPipelines.GLOBALS_SNIPPET;
 //?}
@@ -80,13 +83,16 @@ public class RenderScale {
                 .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_easu"))
                 .withVertexShader("core/screenquad")
                 .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/easu"))
-                .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-                .withDepthWrite(false)
                 //? <= 26.1 {
-                    /*.withSampler("InSampler")
+                    /*//? 1.21.11 {
+                /^.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                .withDepthWrite(false)
+
+                    ^///?}
+                    .withSampler("InSampler")
                     .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
                     *///?} else {
-
+                
                 .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
                 .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
                     //?}
@@ -98,13 +104,17 @@ public class RenderScale {
                     .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_rcas"))
                     .withVertexShader("core/screenquad")
                     .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/rcas"))
-                    .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-                    .withDepthWrite(false)
                     //? <= 26.1 {
-                    /*.withSampler("InSampler")
+                    /*//? 1.21.11 {
+                    /^.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                    .withDepthWrite(false)
+
+                    ^///?}
+                    .withSampler("InSampler")
                     .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
                     *///?} else {
 
+                    
                     .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
                     .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
                     //?}

@@ -104,6 +104,12 @@ sealed class Loader(val id: String) {
             addDeps(ctx.extension.dependencies.optional, "optional")
             addDeps(ctx.extension.dependencies.incompatible, "incompatible")
 
+            val accessTransformers = if (ctx.loader is NeoForge) {
+                listOf(ForgeAccessTransformer("aw/${ctx.currentMcVersion}.cfg"))
+            } else {
+                emptyList()
+            }
+
             val manifest = ForgeManifest(
                 license = ctx.licenseName, issueTrackerURL = ctx.issuesUrl, mods = listOf(
                     ForgeMod(
@@ -117,7 +123,10 @@ sealed class Loader(val id: String) {
                         credits = "${ctx.authors.joinToString(", ")} Contributors: ${ctx.contributors.joinToString(", ")}",
                         description = ctx.description
                     )
-                ), dependencies = mapOf(ctx.modId to forgeDeps), mixins = listOf(ForgeMixin("${ctx.modId}.mixins.json"))
+                ),
+                dependencies = mapOf(ctx.modId to forgeDeps),
+                mixins = listOf(ForgeMixin("${ctx.modId}.mixins.json")),
+                accessTransformers = accessTransformers
             )
 
             return TOML.encodeToString(manifest)
