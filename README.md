@@ -1,6 +1,6 @@
 # RenderScale
 
-RenderScale allows you to change Minecraft's render resolution **separately** from the HUD elements.
+RenderScale allows you to change Minecraft's resolution without affecting the UI.
 
 This is a fork of [ResolutionControl++](https://github.com/ModLabsCC/Resolution-Control), with added support for NeoForge.
 
@@ -18,7 +18,7 @@ Press `O` or, use the mod menu config to control the render scale multiplier. Yo
 
 You can also force "linear" scale algorithm (similar to FXAA) in lower render scales if you want. It's best to leave it as OFF if you're using shaders since they usually have their own antialiasing.
 
-There are no plans to support DLSS or FSR 2.0+. I'm looking into potential FSR 1.0 support, but I'm not sure yet.
+There is experimental support for FSR 1.0 upscaling on 1.21.11 and above! No plans to support DLSS or FSR 2.0+.
 
 There are plans for Dynamic Resolution!
 
@@ -29,8 +29,6 @@ There are plans for Dynamic Resolution!
 ## ⚠️ This mod is NOT compatible with Lunar Client / Feather Client. It will break if you use them.
 
 Aims to be compatible with any mod, including Sodium, Iris, etc. However, there are mods that can break RenderScale. You can report any issues [here](https://github.com/Zolo101/RenderScale/issues), or on my [discord](https://discord.com/invite/YVuuF9KB5j). Make sure to include your latest MC logs!
-
-**1.21.5+ Nvidia Note**: Very rarely, certain systems with NVIDIA GPUs can get UI artifacts while in inventory, etc. If you're affected by this, check out [1.21.5+ NVIDIA UI Artifacts](https://github.com/Zolo101/RenderScale/issues/29) for updates and potential fixes.
 
 ---
 
