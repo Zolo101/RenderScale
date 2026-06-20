@@ -20,7 +20,8 @@ platform {
     loader = "fabric-m"
     dependencies {
         required("minecraft") {
-            fabricLikeVersionRange = prop("deps.minecraft")
+            // If mojang makes a breaking change in a patch version we just have to thug it out #toobad
+            fabricLikeVersionRange = "${prop("deps.minecraft")}.*"
         }
         required("fabric-api") {
             slug("fabric-api")
