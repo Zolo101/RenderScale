@@ -22,6 +22,11 @@ repositories {
     maven("https://jitpack.io") { name = "Jitpack" }
 }
 
+// No "no comment" warnings
+tasks.withType<Javadoc>().configureEach {
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+}
+
 dependencies {
     implementation(libs.kikugie.postprocess)
     implementation(libs.dotenv.gradle)
