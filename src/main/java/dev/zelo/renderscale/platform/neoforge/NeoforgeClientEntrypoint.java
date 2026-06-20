@@ -3,6 +3,9 @@
 
 /*package dev.zelo.renderscale.platform.neoforge;
 
+//? > 26.1
+import net.minecraft.client.gui.Gui;
+
 import dev.zelo.renderscale.Constants;
 import dev.zelo.renderscale.RenderScale;
 import dev.zelo.renderscale.config.RenderScaleConfig;
@@ -36,7 +39,11 @@ public class NeoforgeClientEntrypoint {
 
 
     public NeoforgeClientEntrypoint(IEventBus eventBus, ModContainer modContainer) {
-        keyBinding = new KeyMapping("key.renderscale.options", GLFW.GLFW_KEY_O, /^? >= 1.21.9 {^/ category /^?} else {^/ /^"key.renderscale.category" ^//^?}^/);
+        //? >= 26.1 {
+        keyBinding = new KeyMapping("key.renderscale.options", /^? < 26.2 {^/ /^GLFW.GLFW_KEY_O ^//^?} else {^/ GLFW.GLFW_KEY_U /^?}^/, category);
+        //?} else {
+        /^keyBinding = new KeyMapping("key.renderscale.options", GLFW.GLFW_KEY_O, /^¹? >= 1.21.9 {¹^/ category /^¹?} else {¹^/ /^¹"key.renderscale.category" ¹^//^¹?}¹^/);
+         ^///?}
 
         modContainer.registerExtensionPoint(IConfigScreenFactory.class, (container, screen) -> NeoforgeClientEntrypoint.getConfigScreen(screen));
 
@@ -74,7 +81,11 @@ public class NeoforgeClientEntrypoint {
         }
 
         while (keyBinding.consumeClick()) {
-            Minecraft.getInstance().setScreen(AutoConfigClient.getConfigScreen(RenderScaleConfig.class, Minecraft.getInstance().screen).get());
+            //? > 26.1 {
+            Gui gui = Minecraft.getInstance().gui;
+            gui.setScreen(AutoConfigClient.getConfigScreen(RenderScaleConfig.class, gui.screen()).get());
+            //?} else
+            //Minecraft.getInstance().setScreen(AutoConfigClient.getConfigScreen(RenderScaleConfig.class, Minecraft.getInstance().screen).get());
         }
     }
 

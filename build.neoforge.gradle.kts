@@ -98,7 +98,10 @@ dependencies {
         exclude("net.fabricmc.fabric-api")
     }
 
-    compileOnly("maven.modrinth:iris:${property("deps.iris")}-neoforge")
+//    compileOnly("maven.modrinth:iris:${property("deps.iris")}-neoforge")
+
+    // iris releases faster on fabric, this doesn't seem to cause any problems using it in neoforge
+    compileOnly("maven.modrinth:iris:${property("deps.iris")}-fabric")
 }
 
 tasks.named("createMinecraftArtifacts") {

@@ -188,5 +188,6 @@ publish.additionalVersions = ["26.1.1", "26.1.2"]
 
 [neoforge."26.2"]
 deps.minecraft = "26.2"
-deps.cloth_config = "26.1.154"
-#deps.iris = "1.11.1+26.2"
+deps.cloth_config = "26.2.155"
+deps.iris = "1.11.1+26.2"
+deps.neoforge = "26.2.0.6-beta"
