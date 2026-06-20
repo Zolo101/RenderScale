@@ -1,8 +1,8 @@
 mod.id = "renderscale"
 mod.name = "RenderScale"
 mod.group = "dev.zelo"
-mod.version = "1.4.0-alpha.2"
-mod.channel_tag = ""
+mod.version = "1.4.0"
+mod.channel_tag = "-alpha.2"
 mod.description = "RenderScale allows you to change Minecraft's render resolution separately from the HUD elements."
 mod.authors = ["Zelo101"]
 mod.contributors = []
