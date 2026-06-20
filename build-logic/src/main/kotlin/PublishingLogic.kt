@@ -81,7 +81,7 @@ fun Project.configureModPublishing(ctx: Context) {
         modLoaders.add(ctx.loader.id)
 
         displayName =
-            "${ctx.modName} ${ctx.basicVersion} ${ctx.loader.id.replaceFirstChar(Char::titlecase)} ${ctx.currentMcVersion}"
+            "${ctx.modName} ${ctx.basicVersion} for ${ctx.loader.id.replaceFirstChar(Char::titlecase)} ${ctx.currentMcVersion}"
 
         val deps = ctx.extension.dependencies
 
