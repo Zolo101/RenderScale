@@ -1,4 +1,4 @@
-//? !forge {
+//? iris {
 package dev.zelo.renderscale.mixin.compat.iris;
 
 import dev.kikugie.fletching_table.annotation.MixinEnvironment;

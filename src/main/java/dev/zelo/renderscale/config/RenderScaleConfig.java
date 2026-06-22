@@ -10,8 +10,7 @@ import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 
-// TODO: Have a "iris" variable
-//? !forge
+//? iris
 import net.irisshaders.iris.api.v0.IrisApi;
 
 @Config(name = "renderscale")
@@ -29,7 +28,7 @@ public class RenderScaleConfig implements ConfigData {
 //  double Performance = 2.0;  // (0.5)
 
     // TODO: Support oculus?
-    //? !forge {
+    //? iris {
     @ConfigEntry.Category("iris")
     @ConfigEntry.Gui.Tooltip()
     public float irisScale = -1.0f;
@@ -53,7 +52,7 @@ public class RenderScaleConfig implements ConfigData {
         // To avoid 0x0 crashes if the user FOR SOME REASON puts 0 as the scale
         float safeScale = Math.max(0.01f, scale);
 
-        //? !forge {
+        //? iris {
         if (RenderScale.PLATFORM.isModLoaded("iris")) {
             if (IrisApi.getInstance().isShaderPackInUse() && irisScale > 0.0f) {
                 return irisScale;
@@ -73,6 +72,6 @@ public class RenderScaleConfig implements ConfigData {
         //? >= 1.21.11 {
         return fsr || forceLinear || getScale() > 1.0;
         //?} else
-//        return forceLinear || getScale() > 1.0;
+        //return forceLinear || getScale() > 1.0;
     }
 }
