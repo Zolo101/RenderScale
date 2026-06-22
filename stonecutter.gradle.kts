@@ -49,7 +49,13 @@ stonecutter parameters {
     swaps["mod_name"] = "\"${properties.get<String>("mod.name")}\";"
     swaps["mod_group"] = "\"${properties.get<String>("mod.group")}\";"
     swaps["minecraft"] = "\"${current.version}\";"
-    constants["release"] = properties.get<String>("mod.id") != "modtemplate"
+    // TODO: node.project.property("deps.iris") gives missingPropertyException? why?
+//    dependencies["iris"] = current.project.property("deps.iris") as String
+//    dependencies["sodium"] = current.project.property("deps.sodium") as String
+
+    constants["iris"] = sc.eval(current.project.substringAfterLast('-'), "!=forge")
+    constants["sodium"] = sc.eval(current.version, ">=1.21.11") || sc.eval(current.version, "1.21.1")
+
 }
 
 for (version in stonecutter.versions.map { it.version }.distinct()) tasks.register("publish$version") {

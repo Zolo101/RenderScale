@@ -52,6 +52,7 @@ sealed class Loader(val id: String) {
                 entrypoints = mapOf(
                     "client" to listOf("${ctx.modGroup}.${ctx.modId}.platform.fabric.FabricClientEntrypoint"),
                     "modmenu" to listOf("${ctx.modGroup}.${ctx.modId}.compat.modmenu.ModMenuApiImpl"),
+                    "sodium:config_api_user" to listOf("${ctx.modGroup}.${ctx.modId}.compat.sodium.RenderScaleSodiumConfig"),
                     "fabric-datagen" to listOf("${ctx.modGroup}.${ctx.modId}.platform.fabric.datagen.FabricDataGeneratorEntrypoint")
                 ),
                 mixins = listOf("${ctx.modId}.mixins.json"),
@@ -126,7 +127,12 @@ sealed class Loader(val id: String) {
                 ),
                 dependencies = mapOf(ctx.modId to forgeDeps),
                 mixins = listOf(ForgeMixin("${ctx.modId}.mixins.json")),
-                accessTransformers = accessTransformers
+                accessTransformers = accessTransformers,
+                modproperties = mapOf(
+                    ctx.modId to mapOf(
+                        "sodium:config_api_user" to "${ctx.modGroup}.${ctx.modId}.compat.sodium.RenderScaleSodiumConfig"
+                    ),
+                ),
             )
 
             return TOML.encodeToString(manifest)

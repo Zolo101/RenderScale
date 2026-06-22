@@ -78,6 +78,7 @@ repositories {
     strictMaven("https://maven.terraformersmc.com/", "com.terraformersmc") { name = "TerraformersMC" }
     strictMaven("https://api.modrinth.com/maven", "maven.modrinth") { name = "Modrinth" }
     strictMaven("https://maven.shedaniel.me/", "me.shedaniel.cloth") { name = "Shedaniel" }
+    strictMaven("https://maven.caffeinemc.net/releases") { name = "CaffeineMC" }
 }
 
 configurations.all {
@@ -101,10 +102,16 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${prop("deps.fabric-api")}")
     modImplementation("com.terraformersmc:modmenu:${prop("deps.modmenu")}")
 
-    // config API for mod menu
+    // config API
     modApi("me.shedaniel.cloth:cloth-config-fabric:${property("deps.cloth_config")}") {
         exclude("net.fabricmc.fabric-api")
     }
+
+    // sodium >0.8, so 1.21.11+ and 1.21.1
+    try {
+        prop("deps.sodium")
+        modImplementation("net.caffeinemc:sodium-fabric-api:${prop("deps.sodium")}+mc${prop("deps.minecraft")}")
+    } catch (e: ExtraPropertiesExtension.UnknownPropertyException) {}
 
     //    modLocalRuntime("maven.modrinth:sodium:${property("deps.sodium")}-fabric")
     //    modLocalRuntime("maven.modrinth:iris:${property("deps.iris")}-fabric")

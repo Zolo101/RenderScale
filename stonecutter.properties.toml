@@ -41,6 +41,8 @@ deps.modmenu = "11.0.4"
 #deps.fabric-api = "0.110.0+1.21.1"
 deps.fabric-api = "0.114.0+1.21.1"
 
+deps.sodium = "0.8.12-beta.1"
+
 publish.additionalVersions = ["1.21"]
 
 [fabric."1.21.3"]
@@ -99,12 +101,17 @@ deps.iris = "1.10.2+1.21.11"
 deps.modmenu = "17.0.0-alpha.1"
 deps.fabric-api = "0.139.4+1.21.11"
 
+deps.sodium = "0.8.12"
+
 [fabric."26.1"]
 deps.minecraft = "26.1"
 deps.cloth_config = "26.1.154"
 deps.iris = "1.10.9+26.1"
 deps.modmenu = "18.0.0-alpha.8"
 deps.fabric-api = "0.144.3+26.1"
+#deps.yacl = "3.9.4"
+
+deps.sodium = "0.8.12+mc26.1.2"
 
 publish.additionalVersions = ["26.1.1", "26.1.2"]
 
@@ -114,6 +121,9 @@ deps.cloth_config = "26.2.155"
 deps.iris = "1.11.1+26.2"
 deps.modmenu = "20.0.0-beta.2"
 deps.fabric-api = "0.152.1+26.2"
+#deps.yacl = "3.9.4"
+
+deps.sodium = "0.9.0+mc26.2"
 
 [forge]
 
@@ -130,6 +140,8 @@ deps.minecraft = "1.21.1"
 deps.cloth_config = "15.0.140"
 deps.iris = "1.8.8+1.21.1"
 deps.neoforge = "21.1.233"
+
+deps.sodium = "0.8.12-beta.1+mc1.21.1"
 
 publish.additionalVersions = ["1.21"]
 
@@ -178,11 +190,15 @@ deps.cloth_config = "21.11.151"
 deps.iris = "1.10.2+1.21.11"
 deps.neoforge = "21.11.6-beta"
 
+deps.sodium = "0.8.12+mc1.21.11"
+
 [neoforge."26.1"]
 deps.minecraft = "26.1"
 deps.cloth_config = "26.1.154"
 deps.iris = "1.10.9+26.1"
 deps.neoforge = "26.1.0.5-beta"
+
+deps.sodium = "0.8.12+mc26.1.2"
 
 publish.additionalVersions = ["26.1.1", "26.1.2"]
 
@@ -191,3 +207,5 @@ deps.minecraft = "26.2"
 deps.cloth_config = "26.2.155"
 deps.iris = "1.11.1+26.2"
 deps.neoforge = "26.2.0.6-beta"
+
+deps.sodium = "0.9.0+mc26.2"

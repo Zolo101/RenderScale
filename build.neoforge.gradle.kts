@@ -88,6 +88,7 @@ repositories {
     mavenCentral()
     strictMaven("https://api.modrinth.com/maven", "maven.modrinth") { name = "Modrinth" }
     strictMaven("https://maven.shedaniel.me/", "me.shedaniel.cloth") { name = "Shedaniel" }
+    strictMaven("https://maven.caffeinemc.net/releases") { name = "CaffeineMC" }
 }
 
 dependencies {
@@ -97,6 +98,12 @@ dependencies {
     api("me.shedaniel.cloth:cloth-config-neoforge:${property("deps.cloth_config")}") {
         exclude("net.fabricmc.fabric-api")
     }
+
+    // sodium >0.8, so 1.21.11+ and 1.21.1
+    try {
+        prop("deps.sodium")
+        implementation("net.caffeinemc:sodium-neoforge-api:${prop("deps.sodium")}")
+    } catch (e: ExtraPropertiesExtension.UnknownPropertyException) {}
 
 //    compileOnly("maven.modrinth:iris:${property("deps.iris")}-neoforge")
 

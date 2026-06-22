@@ -77,6 +77,7 @@ repositories {
     strictMaven("https://maven.terraformersmc.com/", "com.terraformersmc") { name = "TerraformersMC" }
     strictMaven("https://api.modrinth.com/maven", "maven.modrinth") { name = "Modrinth" }
     strictMaven("https://maven.shedaniel.me/", "me.shedaniel.cloth") { name = "Shedaniel" }
+    strictMaven("https://maven.caffeinemc.net/releases") { name = "CaffeineMC" }
 }
 
 dependencies {
@@ -88,10 +89,12 @@ dependencies {
 //    localRuntime("com.terraformersmc:modmenu:${prop("deps.modmenu")}")
     implementation("com.terraformersmc:modmenu:${prop("deps.modmenu")}")
 
-    // config API for mod menu
+    // config API
     api("me.shedaniel.cloth:cloth-config-fabric:${property("deps.cloth_config")}") {
         exclude("net.fabricmc.fabric-api")
     }
+
+    implementation("net.caffeinemc:sodium-fabric-api:${prop("deps.sodium")}")
 
     //    modLocalRuntime("maven.modrinth:sodium:${property("deps.sodium")}-fabric")
     //    modLocalRuntime("maven.modrinth:iris:${property("deps.iris")}-fabric")

@@ -33,7 +33,8 @@ data class ForgeManifest(
     val mods: List<ForgeMod>,
     val dependencies: Map<String, List<ForgeDependency>> = emptyMap(),
     val mixins: List<ForgeMixin> = emptyList(),
-    val accessTransformers: List<ForgeAccessTransformer> = emptyList()
+    val accessTransformers: List<ForgeAccessTransformer> = emptyList(),
+    val modproperties: Map<String, Map<String, String>> = emptyMap()
 )
 
 @Serializable
