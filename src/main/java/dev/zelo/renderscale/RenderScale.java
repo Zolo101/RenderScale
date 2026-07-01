@@ -14,6 +14,7 @@ import static net.minecraft.client.renderer.RenderPipelines.GLOBALS_SNIPPET;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.zelo.renderscale.accessors.MainRenderTargetSetter;
 import dev.zelo.renderscale.config.RenderScaleConfig;
 import dev.zelo.renderscale.platform.Platform;
 import me.shedaniel.autoconfig.ConfigHolder;
@@ -176,9 +177,9 @@ public class RenderScale {
 
     public void setClientRenderTarget(RenderTarget renderTarget) {
         //? < 26.2 {
-        /*client.mainRenderTarget = renderTarget;
+        /*((MainRenderTargetSetter) client).renderScale$setMainRenderTarget(renderTarget);
         *///? } else
-        client.gameRenderer.mainRenderTarget = renderTarget;
+        ((MainRenderTargetSetter) client.gameRenderer).renderScale$setMainRenderTarget(renderTarget);
     }
 
     public ProfilerFiller getProfile() {
