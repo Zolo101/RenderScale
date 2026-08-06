@@ -18,9 +18,10 @@ public class RenderScaleConfig implements ConfigData {
     public float scale = 1.0f;
     public boolean forceLinear = false;
 
-    //? >= 1.21.11
+    //? >= 1.21.11 {
     @ConfigEntry.Gui.Tooltip()
     public boolean fsr = false;
+    //?}
 
 //  double UltraQuality = 1.3; // (0.77)
 //  double Quality = 1.5;      // (0.67)

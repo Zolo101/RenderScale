@@ -93,7 +93,7 @@ public class RenderScale {
                     .withSampler("InSampler")
                     .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
                     *///?} else {
-                
+
                 .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
                 .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
                     //?}
@@ -115,7 +115,7 @@ public class RenderScale {
                     .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
                     *///?} else {
 
-                    
+
                     .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
                     .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
                     //?}
@@ -278,7 +278,12 @@ public class RenderScale {
             ^///?}
 
             //? <= 1.21.4 {
-            /^renderTarget.blitToScreen(window.getWidth(), window.getHeight());
+            /^//? <= 1.21.1 {
+            /^¹// TODO: Forced to do this because of sodium + kubejs... does this affect macOS users?
+            renderTarget.blitToScreen(window.getWidth(), window.getHeight(), false);
+            ¹^///?} else {
+            renderTarget.blitToScreen(window.getWidth(), window.getHeight());
+            //?}
             ^///?} else {
             renderTarget.blitAndBlendToScreen(window.getWidth(), window.getHeight());
             //?}
