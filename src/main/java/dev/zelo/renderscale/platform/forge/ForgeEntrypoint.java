@@ -38,6 +38,9 @@ public class ForgeEntrypoint {
 
         MinecraftForge.EVENT_BUS.addListener(this::onWorldRenderStart);
         MinecraftForge.EVENT_BUS.addListener(this::onClientTickEnd);
+        if (Boolean.getBoolean("renderscale.shaderCompatibilityTest")) {
+            MinecraftForge.EVENT_BUS.addListener(dev.zelo.renderscale.gametest.ForgeShaderCompatibilityTest::frame);
+        }
     }
 
     public static Screen getConfigScreen(Screen parent) {

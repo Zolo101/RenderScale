@@ -302,11 +302,25 @@ public class RenderScale {
         if (shouldScale) {
             clientRenderTarget = client.getMainRenderTarget();
 
+            //? forge {
+            /^// Forge mods may enable a combined depth/stencil buffer on the main
+            // target. Preserve that format before Oculus attaches our world target.
+            if (clientRenderTarget.isStencilEnabled() && !renderTarget.isStencilEnabled()) {
+                renderTarget.enableStencil();
+            }
+            ^///?}
+
             setClientRenderTarget(renderTarget);
             //? <= 1.21.4 {
             /^renderTarget.bindWrite(true);
             ^///?}
         } else {
+            //? forge {
+            /^// A mod can also enable stencil while our target is the main target.
+            if (renderTarget.isStencilEnabled() && !clientRenderTarget.isStencilEnabled()) {
+                clientRenderTarget.enableStencil();
+            }
+            ^///?}
             setClientRenderTarget(clientRenderTarget);
             //? <= 1.21.4 {
             /^client.getMainRenderTarget().bindWrite(true);
