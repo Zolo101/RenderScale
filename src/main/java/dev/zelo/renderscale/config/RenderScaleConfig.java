@@ -9,13 +9,13 @@ import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 
-//? if =1.21.1 {
+//? if stutter {
 /*import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.network.chat.Component;
 import java.util.Optional;
 *///?}
 
-//? iris
+//? iris || (=1.20.1 && forge)
 import net.irisshaders.iris.api.v0.IrisApi;
 
 @Config(name = "renderscale")
@@ -24,14 +24,14 @@ public class RenderScaleConfig implements ConfigData {
     public boolean forceLinear = false;
 
     @ConfigEntry.Category("dynamic")
-    // Tooltips on 1.21.1 come from the compatibility transformer below.
-    //? !=1.21.1
+    // Tooltips on affected shader versions come from the compatibility transformer below.
+    //? !stutter
     @ConfigEntry.Gui.Tooltip()
 //    @ConfigEntry.BoundedDiscrete(min = 0, max = 1000)
     public int targetFrameRate = 0;
 
     @ConfigEntry.Category("dynamic")
-    //? !=1.21.1
+    //? !stutter
     @ConfigEntry.Gui.Tooltip()
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     public Aggression aggressionLevel = Aggression.NORMAL;
@@ -57,7 +57,7 @@ public class RenderScaleConfig implements ConfigData {
     }
 
     @ConfigEntry.Category("dynamic")
-    //? !=1.21.1
+    //? !stutter
     @ConfigEntry.Gui.Tooltip()
 //    @ConfigEntry.BoundedDiscrete(min = 10, max = 100)
     public float minimumScale = 0.1f;
@@ -83,7 +83,7 @@ public class RenderScaleConfig implements ConfigData {
         // Register config
         ConfigHolder<RenderScaleConfig> holder = AutoConfig.register(RenderScaleConfig.class, JanksonConfigSerializer::new);
 
-        //? if =1.21.1 {
+        //? if stutter {
         /*AutoConfig.getGuiRegistry(RenderScaleConfig.class).registerPredicateTransformer(
                 (entries, key, field, config, defaults, registry) -> {
                     boolean available = isDynamicScaleAvailable();
@@ -137,10 +137,15 @@ public class RenderScaleConfig implements ConfigData {
     }
 
     public static boolean isDynamicScaleAvailable() {
-        // Iris on 1.21.1 stutters when dynamic scaling repeatedly resizes shader targets.
+        // Iris on 1.21.1 and Oculus on Forge 1.20.1 stutter when shader targets repeatedly resize.
         // Keep the saved settings so scaling can resume when shaders are disabled.
         //? if =1.21.1 && iris {
         /*if (RenderScale.PLATFORM.isModLoaded("iris") && IrisApi.getInstance().isShaderPackInUse()) {
+            return false;
+        }
+        *///?}
+        //? if =1.20.1 && forge {
+        /*if (RenderScale.PLATFORM.isModLoaded("oculus") && IrisApi.getInstance().isShaderPackInUse()) {
             return false;
         }
         *///?}

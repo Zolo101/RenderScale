@@ -22,7 +22,7 @@
   "text.autoconfig.renderscale.option.irisScale.same": "No change",
   "text.autoconfig.renderscale.category.default": "General",
   "text.autoconfig.renderscale.category.dynamic": "Dynamic Scale (Experimental)",
-  "text.autoconfig.renderscale.category.dynamic.unavailable": "Dynamic scaling is unavailable while shaders are enabled on 1.21.1 because of issues with stuttering.",
+  "text.autoconfig.renderscale.category.dynamic.unavailable": "Dynamic scaling is unavailable while shaders are enabled on this Minecraft version because of issues with stuttering.",
   "text.autoconfig.renderscale.category.iris": "Shaders",
   "key.category.renderscale.category": "RenderScale",
   "key.renderscale.category": "RenderScale",

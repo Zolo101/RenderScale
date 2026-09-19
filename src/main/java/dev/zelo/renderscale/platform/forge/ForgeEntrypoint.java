@@ -78,6 +78,9 @@ public class ForgeEntrypoint {
 
     public void onClientSetup(FMLClientSetupEvent event) {
         RenderScale.init(Minecraft.getInstance());
+        if (net.minecraftforge.fml.ModList.get().isLoaded("embeddium")) {
+            dev.zelo.renderscale.compat.embeddium.RenderScaleEmbeddiumConfig.register();
+        }
     }
 
     public void registerBindings(RegisterKeyMappingsEvent event) {

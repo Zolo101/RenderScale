@@ -7,8 +7,12 @@ stonecutter {
     val (version, loader) = current.project.split('-', limit = 2)
     properties.tags(version, loader)
 
+    // Match the Minecraft type only, preserving names such as Embeddium's OptionIdentifier.
+    replacements.regex(current.parsed >= "1.21.11") {
+        replace("""\bResourceLocation\b""", "Identifier", """\bIdentifier\b""", "ResourceLocation")
+    }
+
     replacements.string(current.parsed >= "1.21.11") {
-        replace("ResourceLocation", "Identifier")
         replace("location()", "identifier()")
     }
 }
@@ -109,6 +113,10 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-config-forge:${property("deps.cloth_config")}") {
         exclude("net.fabricmc.fabric-api")
     }
+
+    // Optional options-screen integration; Embeddium is not bundled or required.
+    modCompileOnly("maven.modrinth:embeddium:0.3.31+mc1.20.1")
+    modCompileOnly("maven.modrinth:oculus:1.20.1-1.8.0")
 
     // for testing and that
     modRuntimeOnly("maven.modrinth:embeddium:0.3.31+mc1.20.1")

@@ -27,4 +27,7 @@ stonecutter parameters {
     constants["iris"] = current.project.substringAfterLast('-') != "forge"
     constants["sodium"] = current.parsed >= "1.21.11" || current.version == "1.21.1"
 
+    // Versions affected by stuttering with Dynamic Scaling + Iris Shaders
+    constants["stutter"] = current.version == "1.20.1" || current.version == "1.21.1"
+
 }
