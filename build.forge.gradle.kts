@@ -30,6 +30,12 @@ platform {
         required("cloth_config") {
             forgeLikeVersionRange = prop("deps.cloth_config")
         }
+        optional("embeddium") {
+            forgeLikeVersionRange = prop("deps.embeddium")
+        }
+        optional("oculus") {
+            forgeLikeVersionRange = prop("deps.oculus")
+        }
 
         // Mods that do the same thing as RenderScale,
         // sometimes people add multiple of these which obviously causes massive bugs due to conflicts
@@ -115,12 +121,12 @@ dependencies {
     }
 
     // Optional options-screen integration; Embeddium is not bundled or required.
-    modCompileOnly("maven.modrinth:embeddium:0.3.31+mc1.20.1")
-    modCompileOnly("maven.modrinth:oculus:1.20.1-1.8.0")
+    modCompileOnly("maven.modrinth:embeddium:${prop("deps.embeddium")}+mc${prop("deps.minecraft")}")
+    modCompileOnly("maven.modrinth:oculus:${prop("deps.minecraft")}-${prop("deps.oculus")}")
 
     // for testing and that
-    modRuntimeOnly("maven.modrinth:embeddium:0.3.31+mc1.20.1")
-    modRuntimeOnly("maven.modrinth:oculus:1.20.1-1.8.0")
+    modRuntimeOnly("maven.modrinth:embeddium:${prop("deps.embeddium")}+mc${prop("deps.minecraft")}")
+    modRuntimeOnly("maven.modrinth:oculus:${prop("deps.minecraft")}-${prop("deps.oculus")}")
     modRuntimeOnly("maven.modrinth:create:mc1.20.1-6.0.8")
 }
 

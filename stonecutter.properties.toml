@@ -151,6 +151,9 @@ deps.forge = "47.3.0"
 
 deps.cloth_config = "11.1.136"
 
+deps.embeddium = "0.3.31"
+deps.oculus = "1.8.0"
+
 [neoforge]
 
 [neoforge."1.21.1"]
