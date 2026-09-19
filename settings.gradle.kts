@@ -35,7 +35,6 @@ stonecutter {
         match("1.21.8", "fabric", "neoforge") // and 1.21.6, 1.21.7
         match("1.21.10", "fabric", "neoforge") // and 1.21.9
         match("1.21.11", "fabric", "neoforge")
-        // TODO: Above versions "publish.additionalVersions" property does not get put in the depends property in mods.toml!!!
 
         // After here, it doesn't have to be the latest hotfix build
         // since we can be confident that hotfix versions won't break the mod

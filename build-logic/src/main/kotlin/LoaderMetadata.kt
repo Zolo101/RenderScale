@@ -1,5 +1,6 @@
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class FabricManifest(
@@ -18,7 +19,7 @@ data class FabricManifest(
     val accessWidener: String,
     val entrypoints: Map<String, List<String>>,
     val mixins: List<String>,
-    val depends: Map<String, String> = emptyMap(),
+    val depends: Map<String, JsonElement> = emptyMap(),
     val recommends: Map<String, String> = emptyMap(),
     val breaks: Map<String, String> = emptyMap(),
     val provides: List<String> = emptyList()

@@ -99,6 +99,16 @@ class Context(
         project.sc.properties.rawOrNull("publish", "additionalVersions")?.to<List<String>>().orEmpty()
     }
 
+    val supportedMinecraftVersions: List<String> by lazy {
+        (listOf(currentMcVersion) + publishAdditionalVersions).distinct().sortedWith { left, right ->
+            when {
+                stonecutter.eval(left, "<$right") -> -1
+                stonecutter.eval(left, ">$right") -> 1
+                else -> 0
+            }
+        }
+    }
+
     val javaVersion: JavaVersion by lazy {
         when {
             stonecutter.eval(currentMcVersion, ">=26") -> JavaVersion.VERSION_25

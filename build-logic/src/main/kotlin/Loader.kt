@@ -1,6 +1,8 @@
 @file:Suppress("unused")
 
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
@@ -72,7 +74,15 @@ sealed class Loader(val id: String) {
                     }
                 },
                 mixins = listOf("${ctx.modId}.mixins.json"),
-                depends = ctx.extension.dependencies.required.associate { it.modid.get() to it.fabricLikeVersionRange.get() },
+                depends = ctx.extension.dependencies.required.associate {
+                    val modId = it.modid.get()
+                    val range = it.fabricLikeVersionRange.get()
+                    modId to if (modId == "minecraft" && ctx.publishAdditionalVersions.isNotEmpty()) {
+                        JsonArray((listOf(range) + ctx.publishAdditionalVersions).distinct().map(::JsonPrimitive))
+                    } else {
+                        JsonPrimitive(range)
+                    }
+                },
                 recommends = ctx.extension.dependencies.optional.associate { it.modid.get() to it.fabricLikeVersionRange.get() },
                 breaks = ctx.extension.dependencies.incompatible.associate { it.modid.get() to it.fabricLikeVersionRange.get() },
                 provides = ctx.extension.dependencies.embeds.map { it.modid.get() }
@@ -95,7 +105,14 @@ sealed class Loader(val id: String) {
                         ForgeDependency(
                             modId = it.modid.get(),
                             side = it.environment.get().uppercase(Locale.getDefault()),
-                            versionRange = it.forgeLikeVersionRange.get(),
+                            versionRange = if (type == "required" && it.modid.get() == "minecraft"
+                                && ctx.publishAdditionalVersions.isNotEmpty()
+                            ) {
+                                // Maven unions must be ordered and use brackets for exact versions.
+                                ctx.supportedMinecraftVersions.joinToString(",") { version -> "[$version]" }
+                            } else {
+                                it.forgeLikeVersionRange.get()
+                            },
                             mandatory = type == "required",
                             type = type
                         )

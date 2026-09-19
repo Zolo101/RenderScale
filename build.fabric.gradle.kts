@@ -7,8 +7,12 @@ stonecutter {
     val (version, loader) = current.project.split('-', limit = 2)
     properties.tags(version, loader)
 
+    // Match the Minecraft type only, preserving names such as Embeddium's OptionIdentifier.
+    replacements.regex(current.parsed >= "1.21.11") {
+        replace("""\bResourceLocation\b""", "Identifier", """\bIdentifier\b""", "ResourceLocation")
+    }
+
     replacements.string(current.parsed >= "1.21.11") {
-        replace("ResourceLocation", "Identifier")
         replace("location()", "identifier()")
     }
 

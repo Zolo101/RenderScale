@@ -87,6 +87,10 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
             )
         }
 
+        // Publishing reads version-specific properties during plugin application,
+        // before the platform build script can configure these tags.
+        project.sc.properties.tags(project.sc.current.version, inferredLoader.id)
+
         val ctx = Context(
             project = this,
             extension = extension,
