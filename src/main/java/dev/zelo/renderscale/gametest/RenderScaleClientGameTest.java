@@ -106,6 +106,15 @@ public class RenderScaleClientGameTest implements FabricClientGameTest {
             });
             context.waitTicks(5);
             ScreenshotVerifier.verifyFilteredScaling(nativeShot, context.takeScreenshot("renderscale_fsr"));
+
+            // Don't need to test this...
+//            setRenderScale(context, 1.0f);
+//            context.waitTicks(5);
+//            ScreenshotVerifier.verifyFilteredScaling(nativeShot, context.takeScreenshot("renderscale_fsr_native"));
+//
+//            setRenderScale(context, 2.0f);
+//            context.waitTicks(5);
+//            ScreenshotVerifier.verifyFilteredScaling(nativeShot, context.takeScreenshot("renderscale_fsr_downsampled"));
         } finally {
             context.runOnClient(client -> {
                 RenderScale.getConfig().fsr = false;

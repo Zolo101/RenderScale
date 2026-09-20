@@ -223,7 +223,7 @@ public class RenderScaleAutoTest {
         phaseFrames = 0;
     }
 
-    private void createWorld(Minecraft client) {
+    void createWorld(Minecraft client) {
         LevelSettings levelSettings = new LevelSettings(
                 "RenderScale Autotest",
                 GameType.CREATIVE,
