@@ -96,20 +96,96 @@ public class RenderScale {
     private RenderTarget intermediateTarget;
 
     //? >= 1.21.11 {
-    public static RenderPipeline FSR_EASU_PIPELINE = buildFsrEasuPipeline();
+    public static final RenderPipeline FSR_EASU_PIPELINE = createFsrPipeline("easu", 0);
+    public static final RenderPipeline FSR_RCAS_PIPELINE = createFsrPipeline("rcas", 0);
 
-    private static RenderPipeline buildFsrEasuPipeline() {
-        RenderPipeline.Builder builder = fullscreenBuilder("pipeline/fsr_easu", "core/easu");
+    private Object fsrDevice;
+    private RenderPipeline fsrEasuPipeline = FSR_EASU_PIPELINE;
+    private RenderPipeline fsrRcasPipeline = FSR_RCAS_PIPELINE;
+
+    private static RenderPipeline createFsrPipeline(String pass, int fp16Extension) {
+        String suffix = fp16Extension == 0 ? "" : "_fp16";
+        RenderPipeline.Builder builder = fullscreenBuilder("pipeline/fsr_" + pass + suffix, "core/" + pass + suffix);
         // The explicit-gather workaround only applies to the RenderPearl
         // pipeline API; older families keep the native textureGather path.
         //? >=26.3 {
-        builder = builder.withShaderDefine("RENDERSCALE_EXPLICIT_GATHER");
+        if ("easu".equals(pass)) {
+            builder.withShaderDefine("RENDERSCALE_EXPLICIT_GATHER");
+        }
         //?}
+        if (fp16Extension != 0) {
+            builder.withShaderDefine("RENDERSCALE_FP16", fp16Extension);
+        }
         return builder.build();
     }
 
-    public static RenderPipeline FSR_RCAS_PIPELINE =
-            fullscreenPipeline("pipeline/fsr_rcas", "core/rcas");
+    private void selectFsrPipelines() {
+        var device = RenderSystem.getDevice();
+        if (fsrDevice == device) return;
+        fsrDevice = device;
+        fsrEasuPipeline = FSR_EASU_PIPELINE;
+        fsrRcasPipeline = FSR_RCAS_PIPELINE;
+
+        int extension = 0;
+        //? >=26.2 {
+        String backend = device.getDeviceInfo().backendName();
+        //?} else
+        //String backend = device.getBackendName();
+        if ("OpenGL".equals(backend)) {
+            // DeviceInfo lists only extensions used by vanilla, not all supported
+            // extensions. Query the active context after confirming the backend.
+            var capabilities = org.lwjgl.opengl.GL.getCapabilities();
+            // NVIDIA exposes FP16 (and accepts our GLSL 450 shaders) even in
+            // Minecraft's OpenGL 3.3 context. Check the shader extensions rather
+            // than the context version, then validate both compiled pipelines.
+            if (capabilities.GL_AMD_gpu_shader_half_float) extension = 2;
+            else if (capabilities.GL_NV_gpu_shader5) extension = 3;
+            else {
+                int count = org.lwjgl.opengl.GL30C.glGetInteger(org.lwjgl.opengl.GL30C.GL_NUM_EXTENSIONS);
+                for (int i = 0; i < count; i++) {
+                    String name = org.lwjgl.opengl.GL30C.glGetStringi(org.lwjgl.opengl.GL30C.GL_EXTENSIONS, i);
+                    if ("GL_EXT_shader_explicit_arithmetic_types_float16".equals(name)
+                            || "GL_EXT_shader_explicit_arithmetic_types".equals(name)) {
+                        extension = 1;
+                        break;
+                    }
+                }
+            }
+        }
+        //? >=26.2 {
+        if ("Vulkan".equals(backend) && dev.zelo.renderscale.compat.vulkan.VulkanFsrSupport.isEnabled(device)) {
+            extension = 1;
+        }
+        //?}
+        if (extension == 0) {
+            Constants.LOG.info("FSR1: using FP32 (shader FP16 is unavailable)");
+            return;
+        }
+        //? >=26.3 {
+        // ShaderC consumes EXT syntax; SPIRV-Cross emits the driver's extension.
+        extension = 1;
+        //?}
+        var easu = createFsrPipeline("easu", extension);
+        var rcas = createFsrPipeline("rcas", extension);
+        try {
+            //? >=26.3 {
+            boolean valid = RenderSystem.getCompiledPipelineNullable(easu) != null
+                    && RenderSystem.getCompiledPipelineNullable(rcas) != null;
+            //?} else {
+            /*boolean valid = device.precompilePipeline(easu).isValid()
+                    && device.precompilePipeline(rcas).isValid();
+            *///?}
+            if (valid) {
+                fsrEasuPipeline = easu;
+                fsrRcasPipeline = rcas;
+                Constants.LOG.info("FSR1: using FP16");
+            } else {
+                Constants.LOG.warn("FSR1: FP16 shader compilation failed; using FP32");
+            }
+        } catch (RuntimeException exception) {
+            Constants.LOG.warn("FSR1: FP16 shader compilation failed; using FP32", exception);
+        }
+    }
 
     public static RenderPipeline RGSS_PIPELINE =
             fullscreenPipeline("pipeline/rgss", "core/rgss");
@@ -377,6 +453,26 @@ public class RenderScale {
                 : getConfig().getScale();
     }
 
+    public String getScalingMode() {
+        double scale = getRenderScaleFactor();
+        boolean upsampling = scale < 1.0;
+        boolean downsampling = scale > 1.0;
+        if (renderTarget != null && clientRenderTarget != null) {
+            upsampling = renderTarget.width < clientRenderTarget.width
+                    || renderTarget.height < clientRenderTarget.height;
+            downsampling = renderTarget.width > clientRenderTarget.width
+                    || renderTarget.height > clientRenderTarget.height;
+        }
+        String direction = downsampling ? "Downsampling" : upsampling ? "Upsampling" : "Native";
+        // Match the blit pass: FSR also runs at native resolution, but not when downsampling.
+        //? >= 1.21.11 {
+        if (getConfig().fsr && !downsampling) {
+            return direction + ", FSR1 " + (fsrEasuPipeline == FSR_EASU_PIPELINE ? "FP32" : "FP16");
+        }
+        //?}
+        return direction + (getConfig().getFilter() ? ", Linear" : ", Nearest");
+    }
+
     public void updateDynamicScale() {
         RenderScaleConfig config = getConfig();
         if (dynamicScaleLevel != client.level) {
@@ -491,9 +587,10 @@ public class RenderScale {
         /*try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), OptionalInt.empty())) {
          *///? } else
         if (getConfig().fsr && input.width <= output.width && input.height <= output.height) {
+            selectFsrPipelines();
             RenderTarget intermediate = ensureIntermediateTarget(output.width, output.height);
-            fullscreenPass("FSR: EASU", FSR_EASU_PIPELINE, intermediate, input, filter);
-            fullscreenPass("FSR: RCAS", FSR_RCAS_PIPELINE, output, intermediate, filter);
+            fullscreenPass("FSR: EASU", fsrEasuPipeline, intermediate, input, filter);
+            fullscreenPass("FSR: RCAS", fsrRcasPipeline, output, intermediate, filter);
         } else if (input.width > output.width && input.height > output.height
                 && getConfig().getDownscaleFilter() != RenderScaleConfig.DownscaleFilter.BILINEAR) {
             // Supersampling: the render target is larger than the output, so downscale

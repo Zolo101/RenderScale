@@ -49,7 +49,7 @@ public class RenderScaleClientGameTest implements FabricClientGameTest {
             Path scaledShot = context.takeScreenshot("renderscale_scaled");
 
             ScreenshotVerifier.verifyScaling(nativeShot, scaledShot);
-            //? >=26.3
+            //? >=26.2
             verifyFilters(context, nativeShot);
             verifyDynamicScale(context);
             //? >=26.3
@@ -85,7 +85,7 @@ public class RenderScaleClientGameTest implements FabricClientGameTest {
     }
     //?}
 
-    //? >=26.3 {
+    //? >=26.2 {
     private static void verifyFilters(ClientGameTestContext context, Path nativeShot) {
         try {
             setRenderScale(context, TEST_SCALE);
@@ -98,14 +98,31 @@ public class RenderScaleClientGameTest implements FabricClientGameTest {
 
             context.runOnClient(client -> {
                 // Fail the test directly if ShaderC cannot compile either FSR pass.
+                //? >=26.3 {
                 com.mojang.blaze3d.systems.RenderSystem.getCompiledPipeline(RenderScale.FSR_EASU_PIPELINE);
                 com.mojang.blaze3d.systems.RenderSystem.getCompiledPipeline(RenderScale.FSR_RCAS_PIPELINE);
+                //?} else {
+                /*var device = com.mojang.blaze3d.systems.RenderSystem.getDevice();
+                if (!device.precompilePipeline(RenderScale.FSR_EASU_PIPELINE).isValid()
+                        || !device.precompilePipeline(RenderScale.FSR_RCAS_PIPELINE).isValid()) {
+                    throw new AssertionError("FSR pipelines must compile");
+                }
+                *///?}
                 RenderScale.getConfig().forceLinear = false;
                 RenderScale.getConfig().fsr = true;
                 RenderScale.CONFIG.save();
             });
             context.waitTicks(5);
             ScreenshotVerifier.verifyFilteredScaling(nativeShot, context.takeScreenshot("renderscale_fsr"));
+
+            // Don't need to test this...
+//            setRenderScale(context, 1.0f);
+//            context.waitTicks(5);
+//            ScreenshotVerifier.verifyFilteredScaling(nativeShot, context.takeScreenshot("renderscale_fsr_native"));
+//
+//            setRenderScale(context, 2.0f);
+//            context.waitTicks(5);
+//            ScreenshotVerifier.verifyFilteredScaling(nativeShot, context.takeScreenshot("renderscale_fsr_downsampled"));
         } finally {
             context.runOnClient(client -> {
                 RenderScale.getConfig().fsr = false;

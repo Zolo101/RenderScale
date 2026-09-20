@@ -18,7 +18,7 @@ Press `U` (sometimes `O`) or, use the mod menu config to control the render scal
 
 ## Other features
 
-On 1.21.11 and above, there is experimental support for **FSR 1.0**! No plans to support DLSS or FSR 2.0+.
+**FSR 1** support! No plans to support DLSS or FSR 2+.
 
 Also, there is experimental support for **Dynamic Scaling** (1.4.0-alpha.6+), which tries to keep the game at your targeted FPS by changing the multiplier while you play. 
 

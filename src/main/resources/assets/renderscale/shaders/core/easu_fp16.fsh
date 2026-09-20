@@ -1,15 +1,17 @@
-#version 420
+#version 450
 
 #define A_GPU 1
 #define A_GLSL 1
 
-#define FSR_EASU_F 1
-#define FSR_COLOUR AF3
-#define FSR_GATHER AF4
-#define FSR_EASU_R FsrEasuRF
-#define FSR_EASU_G FsrEasuGF
-#define FSR_EASU_B FsrEasuBF
-#define FSR_EASU FsrEasuF
+#moj_import <renderscale:fsr_precision.glsl>
+
+#define FSR_EASU_H 1
+#define FSR_COLOUR AH3
+#define FSR_GATHER AH4
+#define FSR_EASU_R FsrEasuRH
+#define FSR_EASU_G FsrEasuGH
+#define FSR_EASU_B FsrEasuBH
+#define FSR_EASU FsrEasuH
 
 #moj_import <renderscale:ffx_a.glsl>
 #moj_import <renderscale:ffx_fsr1.glsl>
