@@ -169,3 +169,11 @@ dependencies {
 
     modCompileOnly("maven.modrinth:iris:${property("deps.iris")}-fabric")
 }
+
+// Game-test classes are dev-only: the fabric-client-gametest entrypoint is
+// read by the gametest API in dev runs (which use the source set directly)
+// and ignored by the loader in production. Keep the dead classes out of
+// the shipped jar.
+tasks.jar {
+    exclude("dev/zelo/renderscale/gametest/**")
+}

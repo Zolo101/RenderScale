@@ -19,6 +19,12 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
     private static final Identifier MINIMUM_SCALE = id("minimum_scale");
     //? >= 1.21.11
     private static final Identifier FSR = id("fsr");
+    //? >= 1.21.11
+    private static final Identifier DOWNSCALE_FILTER = id("downscale_filter");
+    //? >= 1.21.11
+    private static final Identifier SHARPENING_MODE = id("sharpening_mode");
+    //? >= 1.21.11
+    private static final Identifier SHARPENING_STRENGTH = id("sharpening_strength");
     //? iris
     private static final Identifier IRIS_SCALE = id("iris_scale");
 
@@ -43,7 +49,13 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
                                         .setStorageHandler(this.storageHandler)
                                         .setBinding(this::setScalePercent, this::getScalePercent)
                                         .setDefaultValue(100)
-                                        .setRange(1, 200, 1)
+                                        // Upper end of the slider must include the 300-400% scales
+                                        // where the Sparse Grid filter activates. Those filters only
+                                        // exist on 1.21.11+, so older versions keep the original range.
+                                        //? >= 1.21.11 {
+                                        .setRange(1, 400, 1)
+                                        //?} else
+                                        //.setRange(1, 200, 1)
                                         .setValueFormatter(RenderScaleSodiumConfig::formatPercent)
 //                                        .setImpact(OptionImpact.VARIES)
                                 )
@@ -63,6 +75,41 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
                                         .setBinding(v -> config().fsr = v, () -> config().fsr)
                                         .setDefaultValue(false)
                                         .setImpact(OptionImpact.MEDIUM)
+                                )
+                                .addOption(builder.createIntegerOption(DOWNSCALE_FILTER)
+                                        .setName(Component.translatable("text.autoconfig.renderscale.option.downscaleFilter"))
+                                        .setTooltip(Component.translatable("text.autoconfig.renderscale.option.downscaleFilter.@Tooltip"))
+                                        .setStorageHandler(this.storageHandler)
+                                        .setBinding(v -> config().downscaleFilter = RenderScaleConfig.DownscaleFilter.values()[v],
+                                                () -> config().getDownscaleFilter().ordinal())
+                                        .setDefaultValue(0)
+                                        .setRange(0, RenderScaleConfig.DownscaleFilter.values().length - 1, 1)
+                                        .setValueFormatter(value -> Component.translatable(
+                                                "text.autoconfig.renderscale.option.downscaleFilter."
+                                                        + RenderScaleConfig.DownscaleFilter.values()[value].name()))
+                                )
+                                .addOption(builder.createIntegerOption(SHARPENING_MODE)
+                                        .setName(Component.translatable("text.autoconfig.renderscale.option.sharpeningMode"))
+                                        .setTooltip(Component.translatable("text.autoconfig.renderscale.option.sharpeningMode.@Tooltip"))
+                                        .setStorageHandler(this.storageHandler)
+                                        .setBinding(v -> config().sharpeningMode = RenderScaleConfig.SharpeningMode.values()[v],
+                                                () -> config().getSharpeningMode().ordinal())
+                                        .setDefaultValue(0)
+                                        .setRange(0, RenderScaleConfig.SharpeningMode.values().length - 1, 1)
+                                        .setValueFormatter(value -> Component.translatable(
+                                                "text.autoconfig.renderscale.option.sharpeningMode."
+                                                        + RenderScaleConfig.SharpeningMode.values()[value].name()))
+                                )
+                                .addOption(builder.createIntegerOption(SHARPENING_STRENGTH)
+                                        .setName(Component.translatable("text.autoconfig.renderscale.option.sharpeningStrength"))
+                                        .setTooltip(Component.translatable("text.autoconfig.renderscale.option.sharpeningStrength.@Tooltip"))
+                                        .setStorageHandler(this.storageHandler)
+                                        .setBinding(v -> config().sharpeningStrength = RenderScaleConfig.normalizeSharpeningStrength(v),
+                                                () -> config().sharpeningStrength)
+                                        .setDefaultValue(35)
+                                        .setRange(0, 100, 5)
+                                        .setValueFormatter(RenderScaleSodiumConfig::formatPercent)
+                                        .setImpact(OptionImpact.LOW)
                                 )
                                 //?}
                         )
@@ -122,13 +169,17 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
                                         .setStorageHandler(this.storageHandler)
                                         .setBinding(this::setIrisScalePercent, this::getIrisScalePercent)
                                         .setDefaultValue(0)
-                                        .setRange(0, 200, 1)
+                                        //? >= 1.21.11 {
+                                        .setRange(0, 400, 1)
+                                        //?} else
+                                        //.setRange(0, 200, 1)
                                         .setValueFormatter(RenderScaleSodiumConfig::formatIrisScale)
 //                                        .setImpact(OptionImpact.VARIES)
                                 )
                         )
-                );
+                )
                         //?}
+                ;
     }
 
     private static Identifier id(String path) {
