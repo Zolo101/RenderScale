@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile FSR's precision/gather variants; requires glslangValidator and spirv-dis.
+"""Compile FSR's precision/gather variants; requires glslangValidator, spirv-dis and spirv-val.
 
 NV_gpu_shader5 must be tested on an NVIDIA driver: glslang does not support it.
 The EXT and AMD variants exercise the same half-float compatibility helpers.
@@ -27,7 +27,7 @@ def expand_imports(source):
 
 
 def main():
-    for tool in ("glslangValidator", "spirv-dis"):
+    for tool in ("glslangValidator", "spirv-dis", "spirv-val"):
         if not shutil.which(tool):
             raise SystemExit(f"Missing required tool: {tool}")
     with tempfile.TemporaryDirectory(prefix="renderscale-fsr-") as directory:
@@ -45,21 +45,30 @@ def main():
                     path = Path(directory) / f"{label}.frag"
                     binary = path.with_suffix(".spv")
                     path.write_text(source)
-                    subprocess.run([
-                        "glslangValidator", "-G", "--auto-map-bindings", "--auto-map-locations",
-                        "-o", str(binary), str(path),
-                    ], check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-                    assembly = subprocess.check_output(["spirv-dis", str(binary)], text=True)
-                    # Check that FP16 really generates half arithmetic, with no int16 or
-                    # storage feature requirement, and that fallback needs no half support.
-                    assert ("OpTypeFloat 16" in assembly) == bool(extension), label
-                    assert "OpCapability Int16" not in assembly, label
-                    assert "OpCapability Storage" not in assembly, label
-                    print(f"PASS {label}")
+                    for target in ("opengl", "vulkan"):
+                        if target == "vulkan" and extension == 2:
+                            continue  # Vulkan uses the EXT arithmetic shader variant.
+                        target_label = f"{target}-{label}"
+                        flags = ["-G"] if target == "opengl" else ["-V", "--target-env", "vulkan1.2"]
+                        subprocess.run([
+                            "glslangValidator", *flags, "--auto-map-bindings", "--auto-map-locations",
+                            "-o", str(binary), str(path),
+                        ], check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                        validation = [] if target == "opengl" else ["--target-env", "vulkan1.2"]
+                        subprocess.run(["spirv-val", *validation, str(binary)], check=True,
+                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                        assembly = subprocess.check_output(["spirv-dis", str(binary)], text=True)
+                        # Require real half arithmetic with no int16 or storage features;
+                        # fallback must not require the Vulkan shaderFloat16 feature.
+                        assert ("OpCapability Float16" in assembly) == bool(extension), target_label
+                        assert ("OpTypeFloat 16" in assembly) == bool(extension), target_label
+                        assert "OpCapability Int16" not in assembly, target_label
+                        assert "OpCapability Storage" not in assembly, target_label
+                        print(f"PASS {target_label}")
 
 
 if __name__ == "__main__":
     try:
         main()
     except subprocess.CalledProcessError as error:
-        raise SystemExit(error.stdout)
+        raise SystemExit(error.stdout or str(error))

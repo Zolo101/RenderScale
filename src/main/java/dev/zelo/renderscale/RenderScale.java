@@ -142,7 +142,6 @@ public class RenderScale {
         fsrRcasPipeline = FSR_RCAS_PIPELINE;
 
         int extension = 0;
-        // Vulkan does not currently enable shaderFloat16 on its logical device.
         //? >=26.2 {
         String backend = device.getDeviceInfo().backendName();
         //?} else
@@ -167,6 +166,11 @@ public class RenderScale {
                 }
             }
         }
+        //? >=26.2 {
+        if ("Vulkan".equals(backend) && dev.zelo.renderscale.compat.vulkan.VulkanFsrSupport.isEnabled(device)) {
+            extension = 1;
+        }
+        //?}
         if (extension == 0) {
             Constants.LOG.info("FSR1: using FP32 (shader FP16 is unavailable)");
             return;
