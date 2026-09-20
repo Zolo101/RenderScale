@@ -15,7 +15,8 @@ public abstract class MixinGlPipelineRecompiler {
     private int renderScale$fp16ShaderVersion(int version, BackendRenderPipeline.CreateInfo.Shader shader) {
         // RenderPearl otherwise lowers even GLSL 450 input to 330, where the
         // AMD half-float built-in overloads are unavailable. These two shaders
-        // are only selected after checking OpenGL 4.5 and FP16 support.
+        // are only selected after checking FP16 extensions; pipeline compilation
+        // verifies that the driver accepts this GLSL version before using FP16.
         return switch (shader.name()) {
             case "renderscale:core/easu_fp16", "renderscale:core/rcas_fp16" -> 450;
             default -> version;

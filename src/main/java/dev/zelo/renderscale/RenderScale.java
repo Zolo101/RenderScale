@@ -150,8 +150,9 @@ public class RenderScale {
             // DeviceInfo lists only extensions used by vanilla, not all supported
             // extensions. Query the active context after confirming the backend.
             var capabilities = org.lwjgl.opengl.GL.getCapabilities();
-            // The half-float built-in overloads used by the AMD header need GLSL 450.
-            if (!capabilities.OpenGL45) return;
+            // NVIDIA exposes FP16 (and accepts our GLSL 450 shaders) even in
+            // Minecraft's OpenGL 3.3 context. Check the shader extensions rather
+            // than the context version, then validate both compiled pipelines.
             if (capabilities.GL_AMD_gpu_shader_half_float) extension = 2;
             else if (capabilities.GL_NV_gpu_shader5) extension = 3;
             else {
