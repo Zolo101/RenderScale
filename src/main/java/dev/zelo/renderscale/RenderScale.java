@@ -406,6 +406,26 @@ public class RenderScale {
                 : getConfig().getScale();
     }
 
+    public String getScalingMode() {
+        double scale = getRenderScaleFactor();
+        boolean upsampling = scale < 1.0;
+        boolean downsampling = scale > 1.0;
+        if (renderTarget != null && clientRenderTarget != null) {
+            upsampling = renderTarget.width < clientRenderTarget.width
+                    || renderTarget.height < clientRenderTarget.height;
+            downsampling = renderTarget.width > clientRenderTarget.width
+                    || renderTarget.height > clientRenderTarget.height;
+        }
+        String direction = downsampling ? "Downsampling" : upsampling ? "Upsampling" : "Native";
+        // Match the blit pass: FSR also runs at native resolution, but not when downsampling.
+        //? >= 1.21.11 {
+        if (getConfig().fsr && !downsampling) {
+            return direction + ", FSR1 " + (fsrEasuPipeline == FSR_EASU_PIPELINE ? "FP32" : "FP16");
+        }
+        //?}
+        return direction + (getConfig().getFilter() ? ", Linear" : ", Nearest");
+    }
+
     public void updateDynamicScale() {
         RenderScaleConfig config = getConfig();
         if (dynamicScaleLevel != client.level) {
