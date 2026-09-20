@@ -96,56 +96,106 @@ public class RenderScale {
     private RenderTarget fsrIntermediateTarget;
 
     //? >= 1.21.11 {
-    public static RenderPipeline FSR_EASU_PIPELINE =
+    public static final RenderPipeline FSR_EASU_PIPELINE = createFsrPipeline("easu", 0);
+    public static final RenderPipeline FSR_RCAS_PIPELINE = createFsrPipeline("rcas", 0);
+
+    private Object fsrDevice;
+    private RenderPipeline fsrEasuPipeline = FSR_EASU_PIPELINE;
+    private RenderPipeline fsrRcasPipeline = FSR_RCAS_PIPELINE;
+
+    private static RenderPipeline createFsrPipeline(String pass, int fp16Extension) {
+        var builder =
             //? >=26.3 {
             RenderPipeline.builder().withBindGroupLayout(BindGroupLayouts.GLOBALS)
                 .withColorTargetState(ColorTargetState.DEFAULT)
                 .withShaderDefine("RENDERSCALE_EXPLICIT_GATHER")
             //?} else
             //RenderPipeline.builder(GLOBALS_SNIPPET)
-                .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_easu"))
+                .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_" + pass
+                        + (fp16Extension == 0 ? "" : "_fp16")))
                 .withVertexShader("core/screenquad")
-                .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/easu"))
+                .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/" + pass
+                        + (fp16Extension == 0 ? "" : "_fp16")))
                 //? <= 26.1 {
                     /*//? 1.21.11 {
                 /^.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
                 .withDepthWrite(false)
-
                     ^///?}
-                    .withSampler("InSampler")
-                    .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
-                    *///?} else {
-
+                .withSampler("InSampler")
+                .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
+                *///?} else {
                 .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
                 .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
-                    //?}
+                //?}
+                ;
+        if (fp16Extension != 0) {
+            builder.withShaderDefine("RENDERSCALE_FP16", fp16Extension);
+        }
+        return builder.build();
+    }
 
-                .build();
+    private void selectFsrPipelines() {
+        var device = RenderSystem.getDevice();
+        if (fsrDevice == device) return;
+        fsrDevice = device;
+        fsrEasuPipeline = FSR_EASU_PIPELINE;
+        fsrRcasPipeline = FSR_RCAS_PIPELINE;
 
-    public static RenderPipeline FSR_RCAS_PIPELINE =
+        int extension = 0;
+        // Vulkan does not currently enable shaderFloat16 on its logical device.
+        //? >=26.2 {
+        String backend = device.getDeviceInfo().backendName();
+        //?} else
+        //String backend = device.getBackendName();
+        if ("OpenGL".equals(backend)) {
+            // DeviceInfo lists only extensions used by vanilla, not all supported
+            // extensions. Query the active context after confirming the backend.
+            var capabilities = org.lwjgl.opengl.GL.getCapabilities();
+            // The half-float built-in overloads used by the AMD header need GLSL 450.
+            if (!capabilities.OpenGL45) return;
+            if (capabilities.GL_AMD_gpu_shader_half_float) extension = 2;
+            else if (capabilities.GL_NV_gpu_shader5) extension = 3;
+            else {
+                int count = org.lwjgl.opengl.GL30C.glGetInteger(org.lwjgl.opengl.GL30C.GL_NUM_EXTENSIONS);
+                for (int i = 0; i < count; i++) {
+                    String name = org.lwjgl.opengl.GL30C.glGetStringi(org.lwjgl.opengl.GL30C.GL_EXTENSIONS, i);
+                    if ("GL_EXT_shader_explicit_arithmetic_types_float16".equals(name)
+                            || "GL_EXT_shader_explicit_arithmetic_types".equals(name)) {
+                        extension = 1;
+                        break;
+                    }
+                }
+            }
+        }
+        if (extension == 0) {
+            Constants.LOG.info("FSR1: using FP32 (shader FP16 is unavailable)");
+            return;
+        }
+        //? >=26.3 {
+        // ShaderC consumes EXT syntax; SPIRV-Cross emits the driver's extension.
+        extension = 1;
+        //?}
+        var easu = createFsrPipeline("easu", extension);
+        var rcas = createFsrPipeline("rcas", extension);
+        try {
             //? >=26.3 {
-            RenderPipeline.builder().withBindGroupLayout(BindGroupLayouts.GLOBALS)
-                .withColorTargetState(ColorTargetState.DEFAULT)
-            //?} else
-            //RenderPipeline.builder(GLOBALS_SNIPPET)
-                    .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_rcas"))
-                    .withVertexShader("core/screenquad")
-                    .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/rcas"))
-                    //? <= 26.1 {
-                    /*//? 1.21.11 {
-                    /^.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-                    .withDepthWrite(false)
-
-                    ^///?}
-                    .withSampler("InSampler")
-                    .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
-                    *///?} else {
-
-
-                    .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
-                    .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
-                    //?}
-                    .build();
+            boolean valid = RenderSystem.getCompiledPipelineNullable(easu) != null
+                    && RenderSystem.getCompiledPipelineNullable(rcas) != null;
+            //?} else {
+            /*boolean valid = device.precompilePipeline(easu).isValid()
+                    && device.precompilePipeline(rcas).isValid();
+            *///?}
+            if (valid) {
+                fsrEasuPipeline = easu;
+                fsrRcasPipeline = rcas;
+                Constants.LOG.info("FSR1: using FP16");
+            } else {
+                Constants.LOG.warn("FSR1: FP16 shader compilation failed; using FP32");
+            }
+        } catch (RuntimeException exception) {
+            Constants.LOG.warn("FSR1: FP16 shader compilation failed; using FP32", exception);
+        }
+    }
     //?}
 
 
@@ -466,6 +516,7 @@ public class RenderScale {
         /*try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), OptionalInt.empty())) {
         *///? } else
         if (getConfig().fsr && input.width <= output.width && input.height <= output.height) {
+            selectFsrPipelines();
             if (fsrIntermediateTarget == null) {
                 // TODO: maybe use TextureTarget, we're wasting like 32MB of VRAM here
                 fsrIntermediateTarget = new MainTarget(output.width, output.height);
@@ -475,7 +526,7 @@ public class RenderScale {
             }
 
             try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "FSR: EASU", fsrIntermediateTarget.getColorTextureView(), /*? > 26.1 {*/ Optional /*?} else {*/ /*OptionalInt *//*?}*/.empty())) {
-                setPipeline(renderPass, FSR_EASU_PIPELINE);
+                setPipeline(renderPass, fsrEasuPipeline);
                 RenderSystem.bindDefaultUniforms(renderPass);
                 renderPass.setUniform("InSampler", input.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
                 //? < 26.2 {
@@ -485,7 +536,7 @@ public class RenderScale {
             }
 
             try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "FSR: RCAS", output.getColorTextureView(), /*? > 26.1 {*/ Optional /*?} else {*/ /*OptionalInt *//*?}*/.empty())) {
-                setPipeline(renderPass, FSR_RCAS_PIPELINE);
+                setPipeline(renderPass, fsrRcasPipeline);
                 RenderSystem.bindDefaultUniforms(renderPass);
                 renderPass.setUniform("InSampler", fsrIntermediateTarget.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
                 //? < 26.2 {
