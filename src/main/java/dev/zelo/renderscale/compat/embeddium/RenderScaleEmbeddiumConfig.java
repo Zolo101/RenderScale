@@ -43,10 +43,6 @@ public final class RenderScaleEmbeddiumConfig {
                                     .setBinding((config, value) -> config.scale = value / 100.0f,
                                             config -> Math.round(config.scale * 100.0f))
                                     .build())
-                            .add(option("forceLinear", Boolean.class)
-                                    .setControl(TickBoxControl::new)
-                                    .setBinding((config, value) -> config.forceLinear = value, config -> config.forceLinear)
-                                    .build())
                             .build())));
             event.addPage(new OptionPage(id("dynamic"),
                     Component.translatable("text.autoconfig.renderscale.category.dynamic"),
@@ -68,6 +64,15 @@ public final class RenderScaleEmbeddiumConfig {
                                     .setControl(opt -> new SliderControl(opt, 10, 100, 1, RenderScaleEmbeddiumConfig::percent))
                                     .setBinding((config, value) -> config.minimumScale = value / 100.0f,
                                             config -> Math.round(config.minimumScale * 100.0f))
+                                    .build())
+                            .build())));
+            event.addPage(new OptionPage(id("advanced"),
+                    Component.translatable("text.autoconfig.renderscale.category.advanced"),
+                    ImmutableList.of(OptionGroup.createBuilder()
+                            .setId(id("advanced_options"))
+                            .add(option("forceLinear", Boolean.class)
+                                    .setControl(TickBoxControl::new)
+                                    .setBinding((config, value) -> config.forceLinear = value, config -> config.forceLinear)
                                     .build())
                             .build())));
         });

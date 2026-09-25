@@ -21,7 +21,6 @@ import net.irisshaders.iris.api.v0.IrisApi;
 @Config(name = "renderscale")
 public class RenderScaleConfig implements ConfigData {
     public float scale = 1.0f;
-    public boolean forceLinear = false;
 
     @ConfigEntry.Category("dynamic")
     // Tooltips on affected shader versions come from the compatibility transformer below.
@@ -53,7 +52,12 @@ public class RenderScaleConfig implements ConfigData {
 
     //? >= 1.21.11 {
     public enum DownscaleFilter implements me.shedaniel.clothconfig2.gui.entries.SelectionListEntry.Translatable {
-        BILINEAR, RGSS, SGSS;
+        AUTO, BILINEAR, RGSS, SGSS;
+
+        public DownscaleFilter resolve(double scale) {
+            if (this != AUTO || scale <= 1.0) return this;
+            return scale >= 3.0 ? SGSS : RGSS;
+        }
 
         @Override
         public String getKey() {
@@ -90,18 +94,6 @@ public class RenderScaleConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip()
     public boolean fsr = false;
 
-    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    @ConfigEntry.Gui.Tooltip()
-    public DownscaleFilter downscaleFilter = DownscaleFilter.BILINEAR;
-
-    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    @ConfigEntry.Gui.Tooltip()
-    public SharpeningMode sharpeningMode = SharpeningMode.OFF;
-
-    @ConfigEntry.BoundedDiscrete(min = 0, max = 100)
-    @ConfigEntry.Gui.Tooltip()
-    public int sharpeningStrength = 35;
-    //?}
 
 //  double UltraQuality = 1.3; // (0.77)
 //  double Quality = 1.5;      // (0.67)
@@ -113,6 +105,25 @@ public class RenderScaleConfig implements ConfigData {
     @ConfigEntry.Category("iris")
     @ConfigEntry.Gui.Tooltip()
     public float irisScale = -1.0f;
+    //?}
+
+    @ConfigEntry.Category("advanced")
+    public boolean forceBilinear = false;
+
+    @ConfigEntry.Category("advanced")
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    @ConfigEntry.Gui.Tooltip()
+    public DownscaleFilter downscaleFilter = DownscaleFilter.AUTO;
+
+    @ConfigEntry.Category("advanced")
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    @ConfigEntry.Gui.Tooltip()
+    public SharpeningMode sharpeningMode = SharpeningMode.OFF;
+
+    @ConfigEntry.Category("advanced")
+    @ConfigEntry.BoundedDiscrete(min = 0, max = 100)
+    @ConfigEntry.Gui.Tooltip()
+    public int sharpeningStrength = 35;
     //?}
 
     public static ConfigHolder<RenderScaleConfig> init() {
@@ -176,15 +187,15 @@ public class RenderScaleConfig implements ConfigData {
         return targetFrameRate > 0 && isDynamicScaleAvailable();
     }
 
+    /**
+     * TODO: Dynamic Scale is disabled while shaders are on due to stuttering... */
     public static boolean isDynamicScaleAvailable() {
-        // Iris on 1.21.1 and Oculus on Forge 1.20.1 stutter when shader targets repeatedly resize.
-        // Keep the saved settings so scaling can resume when shaders are disabled.
-        //? if =1.21.1 && iris {
+        //? if iris {
         /*if (RenderScale.PLATFORM.isModLoaded("iris") && IrisApi.getInstance().isShaderPackInUse()) {
             return false;
         }
         *///?}
-        //? if =1.20.1 && forge {
+        //? if forge {
         /*if (RenderScale.PLATFORM.isModLoaded("oculus") && IrisApi.getInstance().isShaderPackInUse()) {
             return false;
         }
@@ -205,20 +216,21 @@ public class RenderScaleConfig implements ConfigData {
         double effectiveScale = RenderScale.getInstance() == null ? getScale()
                 : RenderScale.getInstance().getRenderScaleFactor();
         //? >= 1.21.11 {
-        return fsr || forceLinear || effectiveScale > 1.0;
+        return fsr || forceBilinear || getDownscaleFilter() == DownscaleFilter.BILINEAR || effectiveScale > 1.0;
         //?} else
         //return forceLinear || effectiveScale > 1.0;
     }
 
     //? >= 1.21.11 {
     public DownscaleFilter getDownscaleFilter() {
-        return downscaleFilter == null ? DownscaleFilter.BILINEAR : downscaleFilter;
+        return downscaleFilter == null ? DownscaleFilter.AUTO : downscaleFilter;
     }
 
     public SharpeningMode getSharpeningMode() {
         return sharpeningMode == null ? SharpeningMode.OFF : sharpeningMode;
     }
 
+    // TODO: Simplify this?
     // The stored strength is canonicalized to the 5% presets the renderer
     // and the cached sharpening pipelines use, at every write path: config
     // load (validatePostLoad), save, and the Sodium slider binding. 0 means

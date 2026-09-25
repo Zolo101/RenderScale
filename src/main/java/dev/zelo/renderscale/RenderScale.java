@@ -462,12 +462,22 @@ public class RenderScale {
                     || renderTarget.height < clientRenderTarget.height;
             downsampling = renderTarget.width > clientRenderTarget.width
                     || renderTarget.height > clientRenderTarget.height;
+            scale = Math.min((double) renderTarget.width / clientRenderTarget.width,
+                    (double) renderTarget.height / clientRenderTarget.height);
         }
         String direction = downsampling ? "Downsampling" : upsampling ? "Upsampling" : "Native";
         // Match the blit pass: FSR also runs at native resolution, but not when downsampling.
         //? >= 1.21.11 {
         if (getConfig().fsr && !downsampling) {
             return direction + ", FSR1 " + (fsrEasuPipeline == FSR_EASU_PIPELINE ? "FP32" : "FP16");
+        }
+        // Both dimensions must be larger, matching the grid-filter blit path.
+        if (scale > 1.0) {
+            var samplingFilter = getConfig().getDownscaleFilter().resolve(scale);
+            if (samplingFilter == RenderScaleConfig.DownscaleFilter.RGSS
+                    || samplingFilter == RenderScaleConfig.DownscaleFilter.SGSS) {
+                return direction + ", " + samplingFilter.name();
+            }
         }
         //?}
         return direction + (getConfig().getFilter() ? ", Linear" : ", Nearest");
@@ -595,9 +605,9 @@ public class RenderScale {
                 && getConfig().getDownscaleFilter() != RenderScaleConfig.DownscaleFilter.BILINEAR) {
             // Supersampling: the render target is larger than the output, so downscale
             // with a fixed rotated/sparse grid filter instead of a single bilinear fetch.
-            // RGSS fits any scale but shines at ~2x; SGSS needs >= 3x of headroom to spread.
-            float ratio = Math.min((float) input.width / output.width, (float) input.height / output.height);
-            RenderPipeline pipeline = getConfig().getDownscaleFilter() == RenderScaleConfig.DownscaleFilter.SGSS && ratio >= 3.0f
+            // Auto follows the actual render-target ratio; explicit filters override it.
+            double ratio = Math.min((double) input.width / output.width, (double) input.height / output.height);
+            RenderPipeline pipeline = getConfig().getDownscaleFilter().resolve(ratio) == RenderScaleConfig.DownscaleFilter.SGSS
                     ? SGSS_PIPELINE : RGSS_PIPELINE;
             String passName = pipeline == SGSS_PIPELINE ? "SGSS downsample" : "RGSS downsample";
             // Sharpening runs as a second pass over an output-sized intermediate.

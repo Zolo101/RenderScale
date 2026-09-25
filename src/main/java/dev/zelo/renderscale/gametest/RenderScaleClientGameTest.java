@@ -90,7 +90,7 @@ public class RenderScaleClientGameTest implements FabricClientGameTest {
         try {
             setRenderScale(context, TEST_SCALE);
             context.runOnClient(client -> {
-                RenderScale.getConfig().forceLinear = true;
+                RenderScale.getConfig().forceBilinear = true;
                 RenderScale.CONFIG.save();
             });
             context.waitTicks(5);
@@ -108,7 +108,7 @@ public class RenderScaleClientGameTest implements FabricClientGameTest {
                     throw new AssertionError("FSR pipelines must compile");
                 }
                 *///?}
-                RenderScale.getConfig().forceLinear = false;
+                RenderScale.getConfig().forceBilinear = false;
                 RenderScale.getConfig().fsr = true;
                 RenderScale.CONFIG.save();
             });
@@ -126,7 +126,7 @@ public class RenderScaleClientGameTest implements FabricClientGameTest {
         } finally {
             context.runOnClient(client -> {
                 RenderScale.getConfig().fsr = false;
-                RenderScale.getConfig().forceLinear = false;
+                RenderScale.getConfig().forceBilinear = false;
                 RenderScale.CONFIG.save();
             });
         }
