@@ -93,59 +93,160 @@ public class RenderScale {
     public RenderTarget clientRenderTarget;
 
     @Nullable
-    private RenderTarget fsrIntermediateTarget;
+    private RenderTarget intermediateTarget;
 
     //? >= 1.21.11 {
-    public static RenderPipeline FSR_EASU_PIPELINE =
+    public static final RenderPipeline FSR_EASU_PIPELINE = createFsrPipeline("easu", 0);
+    public static final RenderPipeline FSR_RCAS_PIPELINE = createFsrPipeline("rcas", 0);
+
+    private Object fsrDevice;
+    private RenderPipeline fsrEasuPipeline = FSR_EASU_PIPELINE;
+    private RenderPipeline fsrRcasPipeline = FSR_RCAS_PIPELINE;
+
+    private static RenderPipeline createFsrPipeline(String pass, int fp16Extension) {
+        String suffix = fp16Extension == 0 ? "" : "_fp16";
+        RenderPipeline.Builder builder = fullscreenBuilder("pipeline/fsr_" + pass + suffix, "core/" + pass + suffix);
+        // The explicit-gather workaround only applies to the RenderPearl
+        // pipeline API; older families keep the native textureGather path.
+        //? >=26.3 {
+        if ("easu".equals(pass)) {
+            builder.withShaderDefine("RENDERSCALE_EXPLICIT_GATHER");
+        }
+        //?}
+        if (fp16Extension != 0) {
+            builder.withShaderDefine("RENDERSCALE_FP16", fp16Extension);
+        }
+        return builder.build();
+    }
+
+    private void selectFsrPipelines() {
+        var device = RenderSystem.getDevice();
+        if (fsrDevice == device) return;
+        fsrDevice = device;
+        fsrEasuPipeline = FSR_EASU_PIPELINE;
+        fsrRcasPipeline = FSR_RCAS_PIPELINE;
+
+        int extension = 0;
+        //? >=26.2 {
+        String backend = device.getDeviceInfo().backendName();
+        //?} else
+        //String backend = device.getBackendName();
+        if ("OpenGL".equals(backend)) {
+            // DeviceInfo lists only extensions used by vanilla, not all supported
+            // extensions. Query the active context after confirming the backend.
+            var capabilities = org.lwjgl.opengl.GL.getCapabilities();
+            // NVIDIA exposes FP16 (and accepts our GLSL 450 shaders) even in
+            // Minecraft's OpenGL 3.3 context. Check the shader extensions rather
+            // than the context version, then validate both compiled pipelines.
+            if (capabilities.GL_AMD_gpu_shader_half_float) extension = 2;
+            else if (capabilities.GL_NV_gpu_shader5) extension = 3;
+            else {
+                int count = org.lwjgl.opengl.GL30C.glGetInteger(org.lwjgl.opengl.GL30C.GL_NUM_EXTENSIONS);
+                for (int i = 0; i < count; i++) {
+                    String name = org.lwjgl.opengl.GL30C.glGetStringi(org.lwjgl.opengl.GL30C.GL_EXTENSIONS, i);
+                    if ("GL_EXT_shader_explicit_arithmetic_types_float16".equals(name)
+                            || "GL_EXT_shader_explicit_arithmetic_types".equals(name)) {
+                        extension = 1;
+                        break;
+                    }
+                }
+            }
+        }
+        //? >=26.2 {
+        if ("Vulkan".equals(backend) && dev.zelo.renderscale.compat.vulkan.VulkanFsrSupport.isEnabled(device)) {
+            extension = 1;
+        }
+        //?}
+        if (extension == 0) {
+            Constants.LOG.info("FSR1: using FP32 (shader FP16 is unavailable)");
+            return;
+        }
+        //? >=26.3 {
+        // ShaderC consumes EXT syntax; SPIRV-Cross emits the driver's extension.
+        extension = 1;
+        //?}
+        var easu = createFsrPipeline("easu", extension);
+        var rcas = createFsrPipeline("rcas", extension);
+        try {
             //? >=26.3 {
-            RenderPipeline.builder().withBindGroupLayout(BindGroupLayouts.GLOBALS)
-                .withColorTargetState(ColorTargetState.DEFAULT)
-                .withShaderDefine("RENDERSCALE_EXPLICIT_GATHER")
-            //?} else
-            //RenderPipeline.builder(GLOBALS_SNIPPET)
-                .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_easu"))
-                .withVertexShader("core/screenquad")
-                .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/easu"))
-                //? <= 26.1 {
-                    /*//? 1.21.11 {
-                /^.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-                .withDepthWrite(false)
+            boolean valid = RenderSystem.getCompiledPipelineNullable(easu) != null
+                    && RenderSystem.getCompiledPipelineNullable(rcas) != null;
+            //?} else {
+            /*boolean valid = device.precompilePipeline(easu).isValid()
+                    && device.precompilePipeline(rcas).isValid();
+            *///?}
+            if (valid) {
+                fsrEasuPipeline = easu;
+                fsrRcasPipeline = rcas;
+                Constants.LOG.info("FSR1: using FP16");
+            } else {
+                Constants.LOG.warn("FSR1: FP16 shader compilation failed; using FP32");
+            }
+        } catch (RuntimeException exception) {
+            Constants.LOG.warn("FSR1: FP16 shader compilation failed; using FP32", exception);
+        }
+    }
 
-                    ^///?}
-                    .withSampler("InSampler")
-                    .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
-                    *///?} else {
+    public static RenderPipeline RGSS_PIPELINE =
+            fullscreenPipeline("pipeline/rgss", "core/rgss");
 
-                .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
-                .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
-                    //?}
+    public static RenderPipeline SGSS_PIPELINE =
+            fullscreenPipeline("pipeline/sgss", "core/sgss");
 
-                .build();
+    // The fullscreen pass chain differs per version family (pipeline lookup,
+    // bind group layout, vertex format vs topology), so every screen-sized
+    // blit goes through this one builder. Callers add their own defines with
+    // the typed withShaderDefine overloads.
+    private static RenderPipeline.Builder fullscreenBuilder(String location, String fragment) {
+        //? >=26.3 {
+        return RenderPipeline.builder().withBindGroupLayout(BindGroupLayouts.GLOBALS)
+            .withColorTargetState(ColorTargetState.DEFAULT)
+        //?} else
+        //return RenderPipeline.builder(GLOBALS_SNIPPET)
+            .withLocation(Identifier.fromNamespaceAndPath("renderscale", location))
+            .withVertexShader("core/screenquad")
+            .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", fragment))
+            //? <= 26.1 {
+                /*//? 1.21.11 {
+            /^.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+            .withDepthWrite(false)
 
-    public static RenderPipeline FSR_RCAS_PIPELINE =
-            //? >=26.3 {
-            RenderPipeline.builder().withBindGroupLayout(BindGroupLayouts.GLOBALS)
-                .withColorTargetState(ColorTargetState.DEFAULT)
-            //?} else
-            //RenderPipeline.builder(GLOBALS_SNIPPET)
-                    .withLocation(Identifier.fromNamespaceAndPath("renderscale", "pipeline/fsr_rcas"))
-                    .withVertexShader("core/screenquad")
-                    .withFragmentShader(Identifier.fromNamespaceAndPath("renderscale", "core/rcas"))
-                    //? <= 26.1 {
-                    /*//? 1.21.11 {
-                    /^.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-                    .withDepthWrite(false)
+                ^///?}
+                .withSampler("InSampler")
+                .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
+                *///?} else {
 
-                    ^///?}
-                    .withSampler("InSampler")
-                    .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
-                    *///?} else {
+            .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
+            .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+            //?}
+            ;
+    }
 
+    private static RenderPipeline fullscreenPipeline(String location, String fragment) {
+        return fullscreenBuilder(location, fragment).build();
+    }
 
-                    .withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
-                    .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
-                    //?}
-                    .build();
+    // Sharpening pipelines: no supported version family exposes a float
+    // uniform setter on a render pass, so the blend factor is a shader
+    // define and each (strength preset, noise mode) pair gets its own
+    // pipeline, built lazily on the render thread. The strength control
+    // stores the same 5% presets, so this array is the whole domain
+    // (21 presets x 2 noise modes).
+    private static final RenderPipeline[] SHARPEN_PIPELINES = new RenderPipeline[42];
+
+    private static RenderPipeline sharpenPipeline(int blendPercent, boolean denoise) {
+        int preset = blendPercent / 5 + (denoise ? 21 : 0);
+        if (SHARPEN_PIPELINES[preset] == null) {
+            String name = "pipeline/sharpen_rcas" + (denoise ? "_denoise" : "") + "_" + blendPercent;
+            RenderPipeline.Builder builder = fullscreenBuilder(name, "core/rcas")
+                    .withShaderDefine("RENDERSCALE_SHARPNESS", blendPercent / 100.0f);
+            if (denoise) {
+                builder = builder.withShaderDefine("FSR_RCAS_DENOISE");
+            }
+            SHARPEN_PIPELINES[preset] = builder.build();
+        }
+        return SHARPEN_PIPELINES[preset];
+    }
     //?}
 
 
@@ -352,6 +453,26 @@ public class RenderScale {
                 : getConfig().getScale();
     }
 
+    public String getScalingMode() {
+        double scale = getRenderScaleFactor();
+        boolean upsampling = scale < 1.0;
+        boolean downsampling = scale > 1.0;
+        if (renderTarget != null && clientRenderTarget != null) {
+            upsampling = renderTarget.width < clientRenderTarget.width
+                    || renderTarget.height < clientRenderTarget.height;
+            downsampling = renderTarget.width > clientRenderTarget.width
+                    || renderTarget.height > clientRenderTarget.height;
+        }
+        String direction = downsampling ? "Downsampling" : upsampling ? "Upsampling" : "Native";
+        // Match the blit pass: FSR also runs at native resolution, but not when downsampling.
+        //? >= 1.21.11 {
+        if (getConfig().fsr && !downsampling) {
+            return direction + ", FSR1 " + (fsrEasuPipeline == FSR_EASU_PIPELINE ? "FP32" : "FP16");
+        }
+        //?}
+        return direction + (getConfig().getFilter() ? ", Linear" : ", Nearest");
+    }
+
     public void updateDynamicScale() {
         RenderScaleConfig config = getConfig();
         if (dynamicScaleLevel != client.level) {
@@ -408,7 +529,7 @@ public class RenderScale {
 
     private void resizeRenderTarget(boolean reloadResources) {
         resize(renderTarget);
-        // The FSR intermediate target is output-sized and is resized by the blit pass.
+        // The intermediate target (FSR upscale or supersampling sharpening) is output-sized and is resized by the blit pass.
         //? <= 1.21.1 {
         /*resize(client.levelRenderer.entityTarget());
 
@@ -464,47 +585,39 @@ public class RenderScale {
 
         //? < 1.21.11 {
         /*try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), OptionalInt.empty())) {
-        *///? } else
+         *///? } else
         if (getConfig().fsr && input.width <= output.width && input.height <= output.height) {
-            if (fsrIntermediateTarget == null) {
-                // TODO: maybe use TextureTarget, we're wasting like 32MB of VRAM here
-                fsrIntermediateTarget = new MainTarget(output.width, output.height);
-//                    fsrIntermediateTarget = new TextureTarget("FSR: Intermediate", output.width, output.height);
-            } else if (fsrIntermediateTarget.width != output.width || fsrIntermediateTarget.height != output.height) {
-                fsrIntermediateTarget.resize(output.width, output.height);
-            }
-
-            try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "FSR: EASU", fsrIntermediateTarget.getColorTextureView(), /*? > 26.1 {*/ Optional /*?} else {*/ /*OptionalInt *//*?}*/.empty())) {
-                setPipeline(renderPass, FSR_EASU_PIPELINE);
-                RenderSystem.bindDefaultUniforms(renderPass);
-                renderPass.setUniform("InSampler", input.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
-                //? < 26.2 {
-                /*renderPass.draw(0, 3);
-                 *///?} else
-                renderPass.draw(3, 1, 0, 0);
-            }
-
-            try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "FSR: RCAS", output.getColorTextureView(), /*? > 26.1 {*/ Optional /*?} else {*/ /*OptionalInt *//*?}*/.empty())) {
-                setPipeline(renderPass, FSR_RCAS_PIPELINE);
-                RenderSystem.bindDefaultUniforms(renderPass);
-                renderPass.setUniform("InSampler", fsrIntermediateTarget.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
-                //? < 26.2 {
-                /*renderPass.draw(0, 3);
-                 *///?} else
-                renderPass.draw(3, 1, 0, 0);
+            selectFsrPipelines();
+            RenderTarget intermediate = ensureIntermediateTarget(output.width, output.height);
+            fullscreenPass("FSR: EASU", fsrEasuPipeline, intermediate, input, filter);
+            fullscreenPass("FSR: RCAS", fsrRcasPipeline, output, intermediate, filter);
+        } else if (input.width > output.width && input.height > output.height
+                && getConfig().getDownscaleFilter() != RenderScaleConfig.DownscaleFilter.BILINEAR) {
+            // Supersampling: the render target is larger than the output, so downscale
+            // with a fixed rotated/sparse grid filter instead of a single bilinear fetch.
+            // RGSS fits any scale but shines at ~2x; SGSS needs >= 3x of headroom to spread.
+            float ratio = Math.min((float) input.width / output.width, (float) input.height / output.height);
+            RenderPipeline pipeline = getConfig().getDownscaleFilter() == RenderScaleConfig.DownscaleFilter.SGSS && ratio >= 3.0f
+                    ? SGSS_PIPELINE : RGSS_PIPELINE;
+            String passName = pipeline == SGSS_PIPELINE ? "SGSS downsample" : "RGSS downsample";
+            // Sharpening runs as a second pass over an output-sized intermediate.
+            // Off (or 0%) resolves straight to the output, keeping the current
+            // single-pass behaviour and skipping all sharpening work.
+            float blend = getConfig().getSharpeningBlend();
+            boolean sharpen = getConfig().getSharpeningMode() != RenderScaleConfig.SharpeningMode.OFF && blend > 0.0f;
+            if (sharpen) {
+                RenderTarget intermediate = ensureIntermediateTarget(output.width, output.height);
+                fullscreenPass(passName, pipeline, intermediate, input, FilterMode.LINEAR);
+                boolean denoise = getConfig().getSharpeningMode() == RenderScaleConfig.SharpeningMode.RCAS_DENOISE;
+                fullscreenPass(denoise ? "RCAS sharpen (noise-protected)" : "RCAS sharpen",
+                        sharpenPipeline(Math.round(blend * 100.0f), denoise), output, intermediate, FilterMode.NEAREST);
+            } else {
+                fullscreenPass(passName, pipeline, output, input, FilterMode.LINEAR);
             }
         } else {
-            try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Blit render target", output.getColorTextureView(), /*? > 26.1 {*/ Optional /*?} else {*/ /*OptionalInt *//*?}*/.empty())) {
-                // Tracy blit is weird because I believe it's technically a debug pass.
-                // However, it looks exactly the same as vanilla, so I'm assuming it's fine.
-                setPipeline(renderPass, RenderPipelines.TRACY_BLIT);
-                RenderSystem.bindDefaultUniforms(renderPass);
-                renderPass.setUniform("InSampler", input.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
-                //? < 26.2 {
-                /*renderPass.draw(0, 3);
-                 *///?} else
-                renderPass.draw(3, 1, 0, 0);
-            }
+            // Tracy blit is weird because I believe it's technically a debug pass.
+            // However, it looks exactly the same as vanilla, so I'm assuming it's fine.
+            fullscreenPass("Blit render target", RenderPipelines.TRACY_BLIT, output, input, filter);
         }
 
         // copying depth doesn't seem to do anything?
@@ -514,6 +627,31 @@ public class RenderScale {
 //            renderPass.setUniform("InSampler2", input.getDepthTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
 //            renderPass.draw(0, 3);
 //        }
+    }
+
+    // Output-sized lazily created/resize intermediate, shared by the FSR EASU
+    // upscale and the supersampling sharpening pass.
+    private RenderTarget ensureIntermediateTarget(int width, int height) {
+        if (intermediateTarget == null) {
+            // TODO: maybe use TextureTarget, we're wasting like 32MB of VRAM here
+            intermediateTarget = new MainTarget(width, height);
+//                intermediateTarget = new TextureTarget("FSR: Intermediate", width, height);
+        } else if (intermediateTarget.width != width || intermediateTarget.height != height) {
+            intermediateTarget.resize(width, height);
+        }
+        return intermediateTarget;
+    }
+
+    private static void fullscreenPass(String name, RenderPipeline pipeline, RenderTarget output, RenderTarget input, FilterMode filter) {
+        try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> name, output.getColorTextureView(), /*? > 26.1 {*/ Optional /*?} else {*/ /*OptionalInt *//*?}*/.empty())) {
+            setPipeline(renderPass, pipeline);
+            RenderSystem.bindDefaultUniforms(renderPass);
+            renderPass.setUniform("InSampler", input.getColorTextureView(), RenderSystem.getSamplerCache().getClampToEdge(filter));
+            //? < 26.2 {
+            /*renderPass.draw(0, 3);
+             *///?} else
+            renderPass.draw(3, 1, 0, 0);
+        }
     }
 
     private static void setPipeline(RenderPass renderPass, RenderPipeline pipeline) {

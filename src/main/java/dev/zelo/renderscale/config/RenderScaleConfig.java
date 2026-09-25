@@ -51,9 +51,33 @@ public class RenderScaleConfig implements ConfigData {
         }
     }
 
+    //? >= 1.21.11 {
+    public enum DownscaleFilter implements me.shedaniel.clothconfig2.gui.entries.SelectionListEntry.Translatable {
+        BILINEAR, RGSS, SGSS;
+
+        @Override
+        public String getKey() {
+            return "text.autoconfig.renderscale.option.downscaleFilter." + name();
+        }
+    }
+
+    public enum SharpeningMode implements me.shedaniel.clothconfig2.gui.entries.SelectionListEntry.Translatable {
+        OFF, RCAS, RCAS_DENOISE;
+
+        @Override
+        public String getKey() {
+            return "text.autoconfig.renderscale.option.sharpeningMode." + name();
+        }
+    }
+    //?}
+
     @Override
     public void validatePostLoad() {
         if (aggressionLevel == null) aggressionLevel = Aggression.NORMAL;
+        //? >= 1.21.11 {
+        if (sharpeningMode == null) sharpeningMode = SharpeningMode.OFF;
+        sharpeningStrength = normalizeSharpeningStrength(sharpeningStrength);
+        //?}
     }
 
     @ConfigEntry.Category("dynamic")
@@ -65,6 +89,18 @@ public class RenderScaleConfig implements ConfigData {
     //? >= 1.21.11 {
     @ConfigEntry.Gui.Tooltip()
     public boolean fsr = false;
+
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    @ConfigEntry.Gui.Tooltip()
+    public DownscaleFilter downscaleFilter = DownscaleFilter.BILINEAR;
+
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    @ConfigEntry.Gui.Tooltip()
+    public SharpeningMode sharpeningMode = SharpeningMode.OFF;
+
+    @ConfigEntry.BoundedDiscrete(min = 0, max = 100)
+    @ConfigEntry.Gui.Tooltip()
+    public int sharpeningStrength = 35;
     //?}
 
 //  double UltraQuality = 1.3; // (0.77)
@@ -105,6 +141,10 @@ public class RenderScaleConfig implements ConfigData {
 
         // Change resolution upon save!
         holder.registerSaveListener((manager, data) -> {
+            //? >= 1.21.11 {
+            // Persist the same canonical presets the renderer consumes.
+            data.sharpeningStrength = normalizeSharpeningStrength(data.sharpeningStrength);
+            //?}
             RenderScale.getInstance().onResolutionChanged();
             IrisCompatibility.reloadShaders();
             return null;
@@ -169,4 +209,30 @@ public class RenderScaleConfig implements ConfigData {
         //?} else
         //return forceLinear || effectiveScale > 1.0;
     }
+
+    //? >= 1.21.11 {
+    public DownscaleFilter getDownscaleFilter() {
+        return downscaleFilter == null ? DownscaleFilter.BILINEAR : downscaleFilter;
+    }
+
+    public SharpeningMode getSharpeningMode() {
+        return sharpeningMode == null ? SharpeningMode.OFF : sharpeningMode;
+    }
+
+    // The stored strength is canonicalized to the 5% presets the renderer
+    // and the cached sharpening pipelines use, at every write path: config
+    // load (validatePostLoad), save, and the Sodium slider binding. 0 means
+    // the pass is skipped entirely (RCAS's fast normalization is not an
+    // exact passthrough, so the bypass must happen on the CPU side).
+    public static int normalizeSharpeningStrength(int strength) {
+        return Math.clamp(Math.round(strength / 5f), 0, 20) * 5;
+    }
+
+    // Blend factor of the sharpening pass. The shader runs RCAS at its
+    // reference tuning and mixes towards the unsharpened pixel, so the
+    // strength behaves as a consistent 0-100% control.
+    public float getSharpeningBlend() {
+        return normalizeSharpeningStrength(sharpeningStrength) / 100.0f;
+    }
+    //?}
 }

@@ -67,8 +67,8 @@ public abstract class MixinDebugScreenOverlay {
                     LevelChunk clientChunk, LevelChunk serverChunk) {
                 RenderScale renderScale = RenderScale.getInstance();
                 if (renderScale != null) {
-                    displayer.addPriorityLine(String.format(Locale.ROOT, "Render scale: %.1f%%",
-                            renderScale.getRenderScaleFactor() * 100.0));
+                    displayer.addPriorityLine(String.format(Locale.ROOT, "Render scale: %.1f%% (%s)",
+                            renderScale.getRenderScaleFactor() * 100.0, renderScale.getScalingMode()));
                 }
             }
         };
@@ -101,8 +101,8 @@ public abstract class MixinDebugScreenOverlay {
         RenderScale renderScale = RenderScale.getInstance();
         if (renderScale != null) {
             List<String> lines = new ArrayList<>(callbackInfo.getReturnValue());
-            lines.add(Math.min(2, lines.size()), String.format(Locale.ROOT, "Render scale: %.1f%%",
-                    renderScale.getRenderScaleFactor() * 100.0));
+            lines.add(Math.min(2, lines.size()), String.format(Locale.ROOT, "Render scale: %.1f%% (%s)",
+                    renderScale.getRenderScaleFactor() * 100.0, renderScale.getScalingMode()));
             callbackInfo.setReturnValue(lines);
         }
     }
