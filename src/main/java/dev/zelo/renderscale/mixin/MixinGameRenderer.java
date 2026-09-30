@@ -86,5 +86,6 @@ public abstract class MixinGameRenderer {
         windowState.guiScale = renderScale$guiScale;
         //?}
         RenderScale.getInstance().setShouldScale(false);
+        dev.zelo.renderscale.compat.skyboxify.SkyboxifyCompat.clearStaleSkySubmits();
     }
 }
