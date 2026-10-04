@@ -70,6 +70,21 @@ public final class RenderScaleEmbeddiumConfig {
                                             config -> Math.round(config.minimumScale * 100.0f))
                                     .build())
                             .build())));
+            event.addPage(new OptionPage(id("iris"),
+                    Component.translatable("text.autoconfig.renderscale.category.iris"),
+                    ImmutableList.of(OptionGroup.createBuilder()
+                            .setId(id("iris_options"))
+                            .add(option("irisScale", Integer.class)
+                                    .setName(Component.translatable("text.autoconfig.renderscale.option.irisScale.sodium"))
+                                    .setTooltip(Component.translatable("text.autoconfig.renderscale.option.irisScale.@Tooltip.sodium"))
+                                    .setControl(opt -> new SliderControl(opt, 0, 200, 1, value -> value == 0
+                                            ? Component.translatable("text.autoconfig.renderscale.option.irisScale.same")
+                                            : percent(value)))
+                                    .setBinding((config, value) -> config.irisScale = value <= 0 ? -1.0f : value / 100.0f,
+                                            config -> Float.isFinite(config.irisScale) && config.irisScale > 0.0f
+                                                    ? Math.round(config.irisScale * 100.0f) : 0)
+                                    .build())
+                            .build())));
             event.addPage(new OptionPage(id("advanced"),
                     Component.translatable("text.autoconfig.renderscale.category.advanced"),
                     ImmutableList.of(OptionGroup.createBuilder()

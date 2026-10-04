@@ -5,6 +5,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import dev.zelo.renderscale.Constants;
 import dev.zelo.renderscale.RenderScale;
+import dev.zelo.renderscale.config.RenderScaleConfig;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gl.framebuffer.GlFramebuffer;
 import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
@@ -28,6 +29,7 @@ public final class ForgeShaderCompatibilityTest {
     private static int frames;
     private static long started;
     private static boolean done;
+    private static float expectedScale;
 
     private ForgeShaderCompatibilityTest() {}
 
@@ -51,9 +53,10 @@ public final class ForgeShaderCompatibilityTest {
             if (step == 1 && client.screen != null) return;
             if (++frames < 30) return;
             frames = 0;
-            verifyTargets();
+            verifyScale();
+            if (step != 9) verifyTargets();
             Constants.LOG.info("Shader compatibility test step {} passed (scale={}, paused={})",
-                    step, RenderScale.getConfig().scale, client.isPaused());
+                    step, RenderScale.getConfig().getScale(), client.isPaused());
             switch (step++) {
                 case 1 -> setScale(1.0f);
                 case 2 -> {
@@ -74,13 +77,29 @@ public final class ForgeShaderCompatibilityTest {
                     require(client.isPaused(), "Pause screen did not pause the game");
                     client.setScreen(null);
                 }
-                case 5 -> setScale(0.25f);
+                case 5 -> {
+                    // Keep the regular scale at native resolution while shaders
+                    // use their own override, including across a pause.
+                    setScale(1.0f);
+                    RenderScale.getConfig().irisScale = 0.25f;
+                    expectedScale = 0.25f;
+                    RenderScale.CONFIG.save();
+                }
                 case 6 -> client.setScreen(new PauseScreen(true));
                 case 7 -> {
                     require(client.isPaused(), "Pause screen did not pause the game");
                     client.setScreen(null);
                 }
-                case 8 -> finish(client, null);
+                case 8 -> {
+                    expectedScale = 1.0f;
+                    Iris.toggleShaders(client, false);
+                }
+                case 9 -> {
+                    expectedScale = 0.25f;
+                    Iris.toggleShaders(client, true);
+                }
+                case 10 -> setScale(1.0f);
+                case 11 -> finish(client, null);
                 default -> throw new AssertionError("Unexpected step");
             }
         } catch (Throwable error) {
@@ -90,8 +109,19 @@ public final class ForgeShaderCompatibilityTest {
 
     private static void setScale(float value) {
         RenderScale.getConfig().scale = value;
+        RenderScale.getConfig().irisScale = -1.0f;
         RenderScale.getConfig().targetFrameRate = 0;
+        expectedScale = value;
         RenderScale.CONFIG.save();
+    }
+
+    private static void verifyScale() {
+        RenderScale scale = RenderScale.getInstance();
+        require(RenderScale.getConfig().getScale() == expectedScale, "Incorrect shader-specific scale");
+        require(RenderScaleConfig.isDynamicScaleAvailable() == (step == 9), "Incorrect shader availability");
+        require(scale.renderTarget.width == Math.max(1, (int) (scale.clientRenderTarget.width * expectedScale))
+                && scale.renderTarget.height == Math.max(1, (int) (scale.clientRenderTarget.height * expectedScale)),
+                "Render target did not resize to the effective scale");
     }
 
     private static int version(RenderTarget target) {

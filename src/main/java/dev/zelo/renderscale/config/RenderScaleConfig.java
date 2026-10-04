@@ -10,13 +10,12 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 
 //? if stutter {
+//? >= 1.21.11
+import me.shedaniel.autoconfig.AutoConfigClient;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.network.chat.Component;
 import java.util.Optional;
 //?}
-
-//? iris || (=1.20.1 && forge)
-import net.irisshaders.iris.api.v0.IrisApi;
 
 @Config(name = "renderscale")
 public class RenderScaleConfig implements ConfigData {
@@ -104,8 +103,7 @@ public class RenderScaleConfig implements ConfigData {
 //  double Balanced = 1.7;     // (0.59)
 //  double Performance = 2.0;  // (0.5)
 
-    // TODO: Support oculus?
-    //? iris {
+    //? iris || (1.20.1 && forge) {
     @ConfigEntry.Category("iris")
     @ConfigEntry.Gui.Tooltip()
     public float irisScale = -1.0f;
@@ -142,7 +140,7 @@ public class RenderScaleConfig implements ConfigData {
         ConfigHolder<RenderScaleConfig> holder = AutoConfig.register(RenderScaleConfig.class, JanksonConfigSerializer::new);
 
         //? if stutter {
-        AutoConfig.getGuiRegistry(RenderScaleConfig.class).registerPredicateTransformer(
+        /*? >= 1.21.11 {*/ AutoConfigClient /*?} else {*/ /*AutoConfig *//*?}*/.getGuiRegistry(RenderScaleConfig.class).registerPredicateTransformer(
                 (entries, key, field, config, defaults, registry) -> {
                     boolean available = isDynamicScaleAvailable();
                     for (var entry : entries) {
@@ -179,19 +177,12 @@ public class RenderScaleConfig implements ConfigData {
         // To avoid 0x0 crashes if the user FOR SOME REASON puts 0 as the scale
         float safeScale = Float.isFinite(scale) ? Math.max(0.01f, scale) : 1.0f;
 
-        //? iris {
-        if (RenderScale.PLATFORM.isModLoaded("iris")) {
-            if (IrisApi.getInstance().isShaderPackInUse() && Float.isFinite(irisScale) && irisScale > 0.0f) {
-                return irisScale;
-            } else {
-                return safeScale;
-            }
-        } else {
-            return safeScale;
+        //? iris || (1.20.1 && forge) {
+        if (IrisCompatibility.isShaderPackInUse() && Float.isFinite(irisScale) && irisScale > 0.0f) {
+            return irisScale;
         }
-        //?} else {
-         /*return safeScale;
-        *///?}
+        //?}
+        return safeScale;
     }
 
     public boolean isDynamicScaleEnabled() {
@@ -201,17 +192,7 @@ public class RenderScaleConfig implements ConfigData {
     /**
      * TODO: Dynamic Scale is disabled while shaders are on due to stuttering... */
     public static boolean isDynamicScaleAvailable() {
-        //? if iris {
-        if (RenderScale.PLATFORM.isModLoaded("iris") && IrisApi.getInstance().isShaderPackInUse()) {
-            return false;
-        }
-        //?}
-        //? if forge {
-        /*if (RenderScale.PLATFORM.isModLoaded("oculus") && IrisApi.getInstance().isShaderPackInUse()) {
-            return false;
-        }
-        *///?}
-        return true;
+        return !IrisCompatibility.isShaderPackInUse();
     }
 
     public int getTargetFrameRate() {
