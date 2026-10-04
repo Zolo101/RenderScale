@@ -83,6 +83,13 @@ public class RenderScaleAutoTest {
                 client.options.pauseOnLostFocus = false;
 
                 if (client.screen instanceof TitleScreen && client.getOverlay() == null) {
+                    //? 1.20.1 || 1.21.1 {
+                    /^LegacyFsrTest.verify();
+                    if (Boolean.getBoolean("renderscale.fsrtest")) {
+                        pass(client);
+                        return;
+                    }
+                    ^///?}
                     createWorld(client);
                     setPhase(Phase.WAIT_WORLD);
                 } else if (phaseTicks > 200) {

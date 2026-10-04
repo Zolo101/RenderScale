@@ -17,13 +17,13 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
     private static final Identifier TARGET_FRAME_RATE = id("target_frame_rate");
     private static final Identifier AGGRESSION = id("aggression");
     private static final Identifier MINIMUM_SCALE = id("minimum_scale");
-    //? >= 1.21.11
+    //? >=1.21.11 || 1.21.1
     private static final Identifier FSR = id("fsr");
     //? >= 1.21.11
     private static final Identifier DOWNSCALE_FILTER = id("downscale_filter");
-    //? >= 1.21.11
+    //? >=1.21.11 || 1.21.1
     private static final Identifier SHARPENING_MODE = id("sharpening_mode");
-    //? >= 1.21.11
+    //? >=1.21.11 || 1.21.1
     private static final Identifier SHARPENING_STRENGTH = id("sharpening_strength");
     //? iris
     private static final Identifier IRIS_SCALE = id("iris_scale");
@@ -59,7 +59,7 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
                                         .setValueFormatter(RenderScaleSodiumConfig::formatPercent)
 //                                        .setImpact(OptionImpact.VARIES)
                                 )
-                                //? >= 1.21.11 {
+                                //? >=1.21.11 || 1.21.1 {
                                 .addOption(builder.createBooleanOption(FSR)
                                         .setName(Component.translatable("text.autoconfig.renderscale.option.fsr"))
                                         .setTooltip(Component.translatable("text.autoconfig.renderscale.option.fsr.@Tooltip"))
@@ -142,6 +142,9 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
                                                 .setName(Component.translatable("text.autoconfig.renderscale.option.forceLinear"))
                                                 .setTooltip(Component.translatable("text.autoconfig.renderscale.option.forceLinear.@Tooltip"))
                                                 .setStorageHandler(this.storageHandler)
+                                                //? 1.21.1 {
+                                                //.setBinding(v -> config().forceLinear = v, () -> config().forceLinear)
+                                                //?} else
                                                 .setBinding(v -> config().forceBilinear = v, () -> config().forceBilinear)
                                                 .setDefaultValue(false)
                                                 .setImpact(OptionImpact.LOW)
@@ -160,6 +163,8 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
                                                                 + RenderScaleConfig.DownscaleFilter.values()[value].name()))
                                                 .setImpact(OptionImpact.LOW)
                                         )
+                                        //?}
+                                        //? >=1.21.11 || 1.21.1 {
                                         .addOption(builder.createIntegerOption(SHARPENING_MODE)
                                                 .setName(Component.translatable("text.autoconfig.renderscale.option.sharpeningMode"))
                                                 .setTooltip(Component.translatable("text.autoconfig.renderscale.option.sharpeningMode.@Tooltip"))

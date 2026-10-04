@@ -32,6 +32,13 @@ public abstract class MixinGameRenderer {
     @Unique private int renderScale$guiScale;
     //?}
 
+    //? 1.20.1 || 1.21.1 {
+    /*@Inject(method = {"reloadShaders", "close"}, at = @At("HEAD"))
+    private void renderScale$closeLegacyShaders(CallbackInfo callbackInfo) {
+        if (RenderScale.getInstance() != null) RenderScale.getInstance().legacyFsr.close();
+    }
+    *///?}
+
     @Inject(method = "render", at = @At("HEAD"))
     private void renderScale$updateDynamicScale(CallbackInfo callbackInfo) {
         if (RenderScale.getInstance() != null) {

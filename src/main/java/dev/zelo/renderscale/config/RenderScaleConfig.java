@@ -10,10 +10,10 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 
 //? if stutter {
-/*import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
+import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import net.minecraft.network.chat.Component;
 import java.util.Optional;
-*///?}
+//?}
 
 //? iris || (=1.20.1 && forge)
 import net.irisshaders.iris.api.v0.IrisApi;
@@ -25,13 +25,13 @@ public class RenderScaleConfig implements ConfigData {
     @ConfigEntry.Category("dynamic")
     // Tooltips on affected shader versions come from the compatibility transformer below.
     //? !stutter
-    @ConfigEntry.Gui.Tooltip()
+    //@ConfigEntry.Gui.Tooltip()
 //    @ConfigEntry.BoundedDiscrete(min = 0, max = 1000)
     public int targetFrameRate = 0;
 
     @ConfigEntry.Category("dynamic")
     //? !stutter
-    @ConfigEntry.Gui.Tooltip()
+    //@ConfigEntry.Gui.Tooltip()
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     public Aggression aggressionLevel = Aggression.NORMAL;
 
@@ -65,6 +65,9 @@ public class RenderScaleConfig implements ConfigData {
         }
     }
 
+    //?}
+
+    //? >=1.21.11 || 1.20.1 || 1.21.1 {
     public enum SharpeningMode implements me.shedaniel.clothconfig2.gui.entries.SelectionListEntry.Translatable {
         OFF, RCAS, RCAS_DENOISE;
 
@@ -78,7 +81,7 @@ public class RenderScaleConfig implements ConfigData {
     @Override
     public void validatePostLoad() {
         if (aggressionLevel == null) aggressionLevel = Aggression.NORMAL;
-        //? >= 1.21.11 {
+        //? >=1.21.11 || 1.20.1 || 1.21.1 {
         if (sharpeningMode == null) sharpeningMode = SharpeningMode.OFF;
         sharpeningStrength = normalizeSharpeningStrength(sharpeningStrength);
         //?}
@@ -86,13 +89,14 @@ public class RenderScaleConfig implements ConfigData {
 
     @ConfigEntry.Category("dynamic")
     //? !stutter
-    @ConfigEntry.Gui.Tooltip()
+    //@ConfigEntry.Gui.Tooltip()
 //    @ConfigEntry.BoundedDiscrete(min = 10, max = 100)
     public float minimumScale = 0.1f;
 
-    //? >= 1.21.11 {
+    //? >=1.21.11 || 1.20.1 || 1.21.1 {
     @ConfigEntry.Gui.Tooltip()
     public boolean fsr = false;
+    //?}
 
 
 //  double UltraQuality = 1.3; // (0.77)
@@ -108,12 +112,19 @@ public class RenderScaleConfig implements ConfigData {
     //?}
 
     @ConfigEntry.Category("advanced")
+    //? 1.20.1 || 1.21.1 {
+    /*public boolean forceLinear = false;
+    *///?} else
     public boolean forceBilinear = false;
 
+    //? >=1.21.11 {
     @ConfigEntry.Category("advanced")
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     @ConfigEntry.Gui.Tooltip()
     public DownscaleFilter downscaleFilter = DownscaleFilter.AUTO;
+    //?}
+
+    //? >=1.21.11 || 1.20.1 || 1.21.1 {
 
     @ConfigEntry.Category("advanced")
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
@@ -131,7 +142,7 @@ public class RenderScaleConfig implements ConfigData {
         ConfigHolder<RenderScaleConfig> holder = AutoConfig.register(RenderScaleConfig.class, JanksonConfigSerializer::new);
 
         //? if stutter {
-        /*AutoConfig.getGuiRegistry(RenderScaleConfig.class).registerPredicateTransformer(
+        AutoConfig.getGuiRegistry(RenderScaleConfig.class).registerPredicateTransformer(
                 (entries, key, field, config, defaults, registry) -> {
                     boolean available = isDynamicScaleAvailable();
                     for (var entry : entries) {
@@ -148,11 +159,11 @@ public class RenderScaleConfig implements ConfigData {
                     ConfigEntry.Category category = field.getAnnotation(ConfigEntry.Category.class);
                     return category != null && category.value().equals("dynamic");
                 });
-        *///?}
+        //?}
 
         // Change resolution upon save!
         holder.registerSaveListener((manager, data) -> {
-            //? >= 1.21.11 {
+            //? >=1.21.11 || 1.20.1 || 1.21.1 {
             // Persist the same canonical presets the renderer consumes.
             data.sharpeningStrength = normalizeSharpeningStrength(data.sharpeningStrength);
             //?}
@@ -191,10 +202,10 @@ public class RenderScaleConfig implements ConfigData {
      * TODO: Dynamic Scale is disabled while shaders are on due to stuttering... */
     public static boolean isDynamicScaleAvailable() {
         //? if iris {
-        /*if (RenderScale.PLATFORM.isModLoaded("iris") && IrisApi.getInstance().isShaderPackInUse()) {
+        if (RenderScale.PLATFORM.isModLoaded("iris") && IrisApi.getInstance().isShaderPackInUse()) {
             return false;
         }
-        *///?}
+        //?}
         //? if forge {
         /*if (RenderScale.PLATFORM.isModLoaded("oculus") && IrisApi.getInstance().isShaderPackInUse()) {
             return false;
@@ -217,8 +228,12 @@ public class RenderScaleConfig implements ConfigData {
                 : RenderScale.getInstance().getRenderScaleFactor();
         //? >= 1.21.11 {
         return fsr || forceBilinear || getDownscaleFilter() == DownscaleFilter.BILINEAR || effectiveScale > 1.0;
-        //?} else
-        //return forceLinear || effectiveScale > 1.0;
+        //?} else {
+        /*//? 1.20.1 || 1.21.1 {
+        /^return fsr || forceLinear || effectiveScale > 1.0;
+        ^///?} else
+        return forceBilinear || effectiveScale > 1.0;
+        *///?}
     }
 
     //? >= 1.21.11 {
@@ -226,6 +241,9 @@ public class RenderScaleConfig implements ConfigData {
         return downscaleFilter == null ? DownscaleFilter.AUTO : downscaleFilter;
     }
 
+    //?}
+
+    //? >=1.21.11 || 1.20.1 || 1.21.1 {
     public SharpeningMode getSharpeningMode() {
         return sharpeningMode == null ? SharpeningMode.OFF : sharpeningMode;
     }
@@ -237,7 +255,7 @@ public class RenderScaleConfig implements ConfigData {
     // the pass is skipped entirely (RCAS's fast normalization is not an
     // exact passthrough, so the bypass must happen on the CPU side).
     public static int normalizeSharpeningStrength(int strength) {
-        return Math.clamp(Math.round(strength / 5f), 0, 20) * 5;
+        return Math.max(0, Math.min(20, Math.round(strength / 5f))) * 5;
     }
 
     // Blend factor of the sharpening pass. The shader runs RCAS at its

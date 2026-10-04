@@ -250,6 +250,9 @@ public class RenderScale {
     //?}
 
 
+    //? 1.20.1 || 1.21.1
+    //public final dev.zelo.renderscale.render.LegacyFsrRenderer legacyFsr = new dev.zelo.renderscale.render.LegacyFsrRenderer();
+
     private static RenderScale instance;
     private boolean shouldScale = false;
     private final DynamicScaleController dynamicScale = new DynamicScaleController();
@@ -430,7 +433,9 @@ public class RenderScale {
             //? <= 1.21.4 {
             /^//? <= 1.21.1 {
             /^¹// TODO: Forced to do this because of sodium + kubejs... does this affect macOS users?
-            renderTarget.blitToScreen(window.getWidth(), window.getHeight(), false);
+            if (!legacyFsr.blit(renderTarget, clientRenderTarget, getConfig())) {
+                renderTarget.blitToScreen(window.getWidth(), window.getHeight(), false);
+            }
             ¹^///?} else {
             renderTarget.blitToScreen(window.getWidth(), window.getHeight());
             //?}
@@ -466,6 +471,11 @@ public class RenderScale {
                     (double) renderTarget.height / clientRenderTarget.height);
         }
         String direction = downsampling ? "Downsampling" : upsampling ? "Upsampling" : "Native";
+        //? 1.20.1 || 1.21.1 {
+        /*if (getConfig().fsr && !downsampling && !legacyFsr.isFailed()) {
+            return direction + ", FSR1 " + legacyFsr.precision();
+        }
+        *///?}
         // Match the blit pass: FSR also runs at native resolution, but not when downsampling.
         //? >= 1.21.11 {
         if (getConfig().fsr && !downsampling) {

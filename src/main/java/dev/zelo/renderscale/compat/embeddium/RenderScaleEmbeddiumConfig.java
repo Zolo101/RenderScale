@@ -43,6 +43,10 @@ public final class RenderScaleEmbeddiumConfig {
                                     .setBinding((config, value) -> config.scale = value / 100.0f,
                                             config -> Math.round(config.scale * 100.0f))
                                     .build())
+                            .add(option("fsr", Boolean.class)
+                                    .setControl(TickBoxControl::new)
+                                    .setBinding((config, value) -> config.fsr = value, config -> config.fsr)
+                                    .build())
                             .build())));
             event.addPage(new OptionPage(id("dynamic"),
                     Component.translatable("text.autoconfig.renderscale.category.dynamic"),
@@ -73,6 +77,17 @@ public final class RenderScaleEmbeddiumConfig {
                             .add(option("forceLinear", Boolean.class)
                                     .setControl(TickBoxControl::new)
                                     .setBinding((config, value) -> config.forceLinear = value, config -> config.forceLinear)
+                                    .build())
+                            .add(option("sharpeningMode", Integer.class)
+                                    .setControl(opt -> new SliderControl(opt, 0, 2, 1, value -> Component.translatable(
+                                            RenderScaleConfig.SharpeningMode.values()[value].getKey())))
+                                    .setBinding((config, value) -> config.sharpeningMode = RenderScaleConfig.SharpeningMode.values()[value],
+                                            config -> config.getSharpeningMode().ordinal())
+                                    .build())
+                            .add(option("sharpeningStrength", Integer.class)
+                                    .setControl(opt -> new SliderControl(opt, 0, 100, 5, RenderScaleEmbeddiumConfig::percent))
+                                    .setBinding((config, value) -> config.sharpeningStrength = RenderScaleConfig.normalizeSharpeningStrength(value),
+                                            config -> config.sharpeningStrength)
                                     .build())
                             .build())));
         });

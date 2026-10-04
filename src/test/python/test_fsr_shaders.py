@@ -13,10 +13,10 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[3] / "src/main/resources/assets/renderscale/shaders"
 
 
-def expand_imports(source):
+def expand_imports(source, legacy=False):
     def include(match):
         if match[1] == "minecraft:globals.glsl":
-            return "layout(std140, binding=0) uniform Globals { vec2 ScreenSize; };"
+            return "uniform vec2 ScreenSize;" if legacy else "layout(std140, binding=0) uniform Globals { vec2 ScreenSize; };"
         included = (ROOT / "include" / match[1].split(":")[1]).read_text()
         # RenderPearl rewrites moj_import and shader interfaces only in the root source.
         assert "#moj_import" not in included, match[1]
@@ -24,6 +24,32 @@ def expand_imports(source):
         return included
 
     return re.sub(r"#moj_import <([^>]+)>", include, source)
+
+
+def check_legacy_shaders(directory):
+    # The framebuffer renderer uses an ordinary screen-size uniform
+    # and a uniform blend instead of strength permutations.
+    for shader, sharpen, denoise in (("easu", False, False), ("rcas", False, False),
+                                      ("rcas", True, False), ("rcas", True, True)):
+        for precision, extension in (("fp32", 0), ("fp16-ext", 1), ("fp16-amd", 2)):
+            if sharpen and extension:
+                continue
+            suffix = "_fp16" if extension else ""
+            source = expand_imports((ROOT / "core" / f"{shader}{suffix}.fsh").read_text(), legacy=True)
+            header = (f"#version 450\n#define RENDERSCALE_FP16 {extension}\n" if extension else
+                      "#version 420\n")
+            if sharpen:
+                header += "#define RENDERSCALE_SHARPNESS SharpeningStrength\n"
+                source = source.replace("out vec4 fragColor;", "uniform float SharpeningStrength;\nout vec4 fragColor;")
+            if denoise:
+                header += "#define FSR_RCAS_DENOISE\n"
+            source = header + source.split("\n", 1)[1]
+            label = f"legacy-{shader}-{precision}-{sharpen}-{denoise}"
+            path = Path(directory) / f"{label}.frag"
+            path.write_text(source)
+            subprocess.run(["glslangValidator", str(path)], check=True,
+                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            print(f"PASS {label}")
 
 
 def main():
@@ -34,6 +60,7 @@ def main():
     variants += [("rcas", strength, denoise)
                  for strength in (0.0, 0.5, 1.0) for denoise in (False, True)]
     with tempfile.TemporaryDirectory(prefix="renderscale-fsr-") as directory:
+        check_legacy_shaders(directory)
         for shader, strength, denoise in variants:
             for precision, extension in (("fp32", 0), ("fp16-ext", 1), ("fp16-amd", 2)):
                 for explicit_gather in (False, True):

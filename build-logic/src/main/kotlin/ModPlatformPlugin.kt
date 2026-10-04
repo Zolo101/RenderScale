@@ -202,9 +202,9 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
                     rename { "accesstransformer.cfg" }
                 }
             }
-            // #moj_import doesn't exist before 1.21.6 so we gotta hide em
-            // but fsr shaders are 1.21.11 anyway so
-            if (ctx.stonecutter.eval(ctx.currentMcVersion, "<1.21.11")) {
+            // Legacy FSR expands the shared shader imports itself.
+            if (ctx.stonecutter.eval(ctx.currentMcVersion, "<1.21.11")
+                && ctx.currentMcVersion !in listOf("1.20.1", "1.21.1")) {
                 exclude("assets/${ctx.modId}/shaders/**")
             }
             // TODO: Perhaps use stonecutter to replace it
