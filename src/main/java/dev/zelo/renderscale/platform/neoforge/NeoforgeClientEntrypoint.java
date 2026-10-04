@@ -93,9 +93,8 @@ public class NeoforgeClientEntrypoint {
             renderScale.hasRun = false;
         }
 
-        //? <1.21.4 {
-        /^dev.zelo.renderscale.gametest.RenderScaleAutoTest.INSTANCE.tick(Minecraft.getInstance());
-        ^///?}
+        //? <1.21.4
+        //dev.zelo.renderscale.gametest.RenderScaleAutoTest.INSTANCE.tick(Minecraft.getInstance());
 
         while (keyBinding.consumeClick()) {
             //? > 26.1 {

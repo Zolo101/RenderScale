@@ -169,8 +169,3 @@ dependencies {
 
     modCompileOnly("maven.modrinth:iris:${property("deps.iris")}-fabric")
 }
-
-// Remove game test classes from prod
-tasks.jar {
-    exclude("dev/zelo/renderscale/gametest/**")
-}

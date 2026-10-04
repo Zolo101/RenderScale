@@ -22,6 +22,8 @@ plugins {
     id("dev.kikugie.loom-back-compat") version "0.4.1"
 }
 
+// TODO: Subproject forge & neoforge https://stonecutter.kikugie.dev/wiki/v2/reference/gradle-api/project-model#tree
+// actually on second thoughts, maybe not. it insists upon itself.
 stonecutter {
     create(rootProject) {
         fun match(version: String, vararg loaders: String) =
