@@ -17,6 +17,12 @@ public class RenderScaleClientGameTest implements FabricClientGameTest {
 
     @Override
     public void runTest(ClientGameTestContext context) {
+        //? >=26.3 {
+        if (Boolean.getBoolean("renderscale.shaderCompatibilityTest")) {
+            IrisShaderCompatibilityTest.run(context);
+            return;
+        }
+        //?}
         try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
             //? >=26.3 {
             singleplayer.getConnection().waitForChunksRender();
