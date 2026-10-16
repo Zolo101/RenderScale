@@ -2,6 +2,8 @@
 
 1.20.1 and 1.21.1 now supports FSR 1 upscaling, and there's RGSS support!
 
+Also added Russian translations, thanks to mpustovoi!
+
 ## Changes
  
 - Improve FSR 1 performance by 30% for GPUs that support FP16 shaders. 
