@@ -7,6 +7,7 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.api.tasks.Copy
@@ -15,6 +16,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.assign
@@ -149,6 +151,11 @@ abstract class ModPlatformPlugin @Inject constructor() : Plugin<Project> {
             targetCompatibility = ctx.javaVersion
             toolchain {
                 languageVersion.set(JavaLanguageVersion.of(ctx.javaVersion.majorVersion))
+            }
+        }
+        tasks.withType<Javadoc>().configureEach {
+            (options as? StandardJavadocDocletOptions)?.apply {
+                addBooleanOption("Xdoclint:-missing", true)
             }
         }
     }
