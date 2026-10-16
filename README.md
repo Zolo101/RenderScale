@@ -18,7 +18,7 @@ Press `U` (sometimes `O`) or, use the mod menu config to control the render scal
 
 ## Other features
 
-**FSR 1** support! No plans to support DLSS or FSR 2+.
+**FSR 1** support is available on 1.20.1, 1.21.1, and 1.21.11+. There are no plans to support DLSS or FSR 2+.
 
 Also, there is experimental support for **Dynamic Scaling** (1.4.0-alpha.6+), which tries to keep the game at your targeted FPS by changing the multiplier while you play. 
 
@@ -31,6 +31,8 @@ Lastly you can force "linear" scale algorithm (similar to FXAA) in lower render 
 ## ⚠️ This mod is NOT compatible with Lunar Client / Feather Client. It will break if you use them.
 
 Aims to be compatible with any mod, including Sodium, Iris, etc. However, there are mods that could break RenderScale. You can report any issues [here](https://github.com/Zolo101/RenderScale/issues), or on my [discord](https://discord.com/invite/YVuuF9KB5j). Make sure to include your latest MC logs!
+
+Dynamic scaling is unavailable while shaders are enabled due to issues with stuttering.
 
 ---
 
