@@ -89,9 +89,9 @@ public final class RenderScaleEmbeddiumConfig {
                     Component.translatable("text.autoconfig.renderscale.category.advanced"),
                     ImmutableList.of(OptionGroup.createBuilder()
                             .setId(id("advanced_options"))
-                            .add(option("forceLinear", Boolean.class)
+                            .add(option("forceBilinear", Boolean.class)
                                     .setControl(TickBoxControl::new)
-                                    .setBinding((config, value) -> config.forceLinear = value, config -> config.forceLinear)
+                                    .setBinding((config, value) -> config.forceBilinear = value, config -> config.forceBilinear)
                                     .build())
                             .add(option("sharpeningMode", Integer.class)
                                     .setControl(opt -> new SliderControl(opt, 0, 2, 1, value -> Component.translatable(

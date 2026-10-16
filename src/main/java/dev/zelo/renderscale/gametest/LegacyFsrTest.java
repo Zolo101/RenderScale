@@ -19,7 +19,7 @@ import static org.lwjgl.opengl.GL33C.*;
 final class LegacyFsrTest {
     static void verify() {
         RenderScaleConfig config = new RenderScaleConfig();
-        config.forceLinear = true;
+        config.forceBilinear = true;
         TextureTarget input = new TextureTarget(17, 13, false, Minecraft.ON_OSX);
         TextureTarget output = new TextureTarget(35, 27, false, Minecraft.ON_OSX);
         try (LegacyFsrRenderer renderer = new LegacyFsrRenderer()) {

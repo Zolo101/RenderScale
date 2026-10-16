@@ -110,9 +110,6 @@ public class RenderScaleConfig implements ConfigData {
     //?}
 
     @ConfigEntry.Category("advanced")
-    //? 1.20.1 || 1.21.1 {
-    /*public boolean forceLinear = false;
-    *///?} else
     public boolean forceBilinear = false;
 
     //? >=1.21.11 {
@@ -211,7 +208,7 @@ public class RenderScaleConfig implements ConfigData {
         return fsr || forceBilinear || getDownscaleFilter() == DownscaleFilter.BILINEAR || effectiveScale > 1.0;
         //?} else {
         /*//? 1.20.1 || 1.21.1 {
-        /^return fsr || forceLinear || effectiveScale > 1.0;
+        /^return fsr || forceBilinear || effectiveScale > 1.0;
         ^///?} else
         return forceBilinear || effectiveScale > 1.0;
         *///?}

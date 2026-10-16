@@ -13,7 +13,7 @@ import net.minecraft.resources.Identifier;
 
 public class RenderScaleSodiumConfig implements ConfigEntryPoint {
     private static final Identifier SCALE = id("scale");
-    private static final Identifier FORCE_LINEAR = id("force_linear");
+    private static final Identifier FORCE_BILINEAR = id("force_bilinear");
     private static final Identifier TARGET_FRAME_RATE = id("target_frame_rate");
     private static final Identifier AGGRESSION = id("aggression");
     private static final Identifier MINIMUM_SCALE = id("minimum_scale");
@@ -138,13 +138,10 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
                 .addPage(builder.createOptionPage()
                         .setName(Component.translatable("text.autoconfig.renderscale.category.advanced"))
                         .addOptionGroup(builder.createOptionGroup()
-                                        .addOption(builder.createBooleanOption(FORCE_LINEAR)
-                                                .setName(Component.translatable("text.autoconfig.renderscale.option.forceLinear"))
-                                                .setTooltip(Component.translatable("text.autoconfig.renderscale.option.forceLinear.@Tooltip"))
+                                        .addOption(builder.createBooleanOption(FORCE_BILINEAR)
+                                                .setName(Component.translatable("text.autoconfig.renderscale.option.forceBilinear"))
+                                                .setTooltip(Component.translatable("text.autoconfig.renderscale.option.forceBilinear.@Tooltip"))
                                                 .setStorageHandler(this.storageHandler)
-                                                //? 1.21.1 {
-                                                //.setBinding(v -> config().forceLinear = v, () -> config().forceLinear)
-                                                //?} else
                                                 .setBinding(v -> config().forceBilinear = v, () -> config().forceBilinear)
                                                 .setDefaultValue(false)
                                                 .setImpact(OptionImpact.LOW)
