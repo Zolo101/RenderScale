@@ -19,7 +19,7 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
     private static final Identifier MINIMUM_SCALE = id("minimum_scale");
     //? >=1.21.11 || 1.21.1
     private static final Identifier FSR = id("fsr");
-    //? >= 1.21.11
+    //? >=1.21.11 || 1.21.1
     private static final Identifier DOWNSCALE_FILTER = id("downscale_filter");
     //? >=1.21.11 || 1.21.1
     private static final Identifier SHARPENING_MODE = id("sharpening_mode");
@@ -50,9 +50,8 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
                                         .setBinding(this::setScalePercent, this::getScalePercent)
                                         .setDefaultValue(100)
                                         // Upper end of the slider must include the 300-400% scales
-                                        // where the Sparse Grid filter activates. Those filters only
-                                        // exist on 1.21.11+, so older versions keep the original range.
-                                        //? >= 1.21.11 {
+                                        // where the Sparse Grid filter activates.
+                                        //? >=1.21.11 || 1.21.1 {
                                         .setRange(1, 400, 1)
                                         //?} else
                                         //.setRange(1, 200, 1)
@@ -126,7 +125,7 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
                                         .setStorageHandler(this.storageHandler)
                                         .setBinding(this::setIrisScalePercent, this::getIrisScalePercent)
                                         .setDefaultValue(0)
-                                        //? >= 1.21.11 {
+                                        //? >=1.21.11 || 1.21.1 {
                                         .setRange(0, 400, 1)
                                         //?} else
                                         //.setRange(0, 200, 1)
@@ -146,7 +145,7 @@ public class RenderScaleSodiumConfig implements ConfigEntryPoint {
                                                 .setDefaultValue(false)
                                                 .setImpact(OptionImpact.LOW)
                                         )
-                                        //? >= 1.21.11 {
+                                        //? >=1.21.11 || 1.21.1 {
                                         .addOption(builder.createIntegerOption(DOWNSCALE_FILTER)
                                                 .setName(Component.translatable("text.autoconfig.renderscale.option.downscaleFilter"))
                                                 .setTooltip(Component.translatable("text.autoconfig.renderscale.option.downscaleFilter.@Tooltip"))

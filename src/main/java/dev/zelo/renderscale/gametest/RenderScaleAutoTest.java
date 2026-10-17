@@ -145,7 +145,7 @@ public class RenderScaleAutoTest {
                     RenderScale.getConfig().scale = 1.0f;
                     RenderScale.getConfig().targetFrameRate = 1000;
                     RenderScale.getConfig().aggressionLevel = dev.zelo.renderscale.config.RenderScaleConfig.Aggression.EXTREME;
-                    RenderScale.getConfig().minimumScale = 50;
+                    RenderScale.getConfig().minimumScale = 0.5f;
                     client.options.enableVsync().set(false);
                     client.options.framerateLimit().set(30);
                     // Automated clients may open behind the editor; exercise focused gameplay.

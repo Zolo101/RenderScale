@@ -29,15 +29,17 @@ def expand_imports(source, legacy=False):
 def check_legacy_shaders(directory):
     # The framebuffer renderer uses an ordinary screen-size uniform
     # and a uniform blend instead of strength permutations.
-    for shader, sharpen, denoise in (("easu", False, False), ("rcas", False, False),
+    for shader, sharpen, denoise in (("rgss", False, False), ("sgss", False, False),
+                                      ("easu", False, False), ("rcas", False, False),
                                       ("rcas", True, False), ("rcas", True, True)):
         for precision, extension in (("fp32", 0), ("fp16-ext", 1), ("fp16-amd", 2)):
-            if sharpen and extension:
+            grid = shader in ("rgss", "sgss")
+            if extension and (sharpen or grid):
                 continue
             suffix = "_fp16" if extension else ""
             source = expand_imports((ROOT / "core" / f"{shader}{suffix}.fsh").read_text(), legacy=True)
             header = (f"#version 450\n#define RENDERSCALE_FP16 {extension}\n" if extension else
-                      "#version 420\n")
+                      "#version 330\n" if grid else "#version 420\n")
             if sharpen:
                 header += "#define RENDERSCALE_SHARPNESS SharpeningStrength\n"
                 source = source.replace("out vec4 fragColor;", "uniform float SharpeningStrength;\nout vec4 fragColor;")

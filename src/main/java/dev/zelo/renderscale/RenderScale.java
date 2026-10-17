@@ -434,6 +434,8 @@ public class RenderScale {
             /^//? <= 1.21.1 {
             /^¹// TODO: Forced to do this because of sodium + kubejs... does this affect macOS users?
             if (!legacyFsr.blit(renderTarget, clientRenderTarget, getConfig())) {
+                renderTarget.setFilterMode(getConfig().getFilter()
+                        ? org.lwjgl.opengl.GL11.GL_LINEAR : org.lwjgl.opengl.GL11.GL_NEAREST);
                 renderTarget.blitToScreen(window.getWidth(), window.getHeight(), false);
             }
             ¹^///?} else {
@@ -481,8 +483,13 @@ public class RenderScale {
         if (getConfig().fsr && !downsampling) {
             return direction + ", FSR1 " + (fsrEasuPipeline == FSR_EASU_PIPELINE ? "FP32" : "FP16");
         }
+        //?}
+        //? >=1.21.11 || 1.20.1 || 1.21.1 {
         // Both dimensions must be larger, matching the grid-filter blit path.
-        if (scale > 1.0) {
+        if (scale > 1.0
+                //? 1.20.1 || 1.21.1
+                //&& !legacyFsr.isFailed()
+        ) {
             var samplingFilter = getConfig().getDownscaleFilter().resolve(scale);
             if (samplingFilter == RenderScaleConfig.DownscaleFilter.RGSS
                     || samplingFilter == RenderScaleConfig.DownscaleFilter.SGSS) {

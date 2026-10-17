@@ -18,7 +18,7 @@ import java.util.Map;
 
 import static org.lwjgl.opengl.GL33C.*;
 
-/^** FSR presentation for the framebuffer renderer used by 1.20.1 and 1.21.1. ^/
+/^** FSR, grid downsampling and sharpening for the framebuffer renderer used by 1.20.1 and 1.21.1. ^/
 public final class LegacyFsrRenderer implements AutoCloseable {
     private static final String VERTEX = """
             #version 330
@@ -51,16 +51,20 @@ public final class LegacyFsrRenderer implements AutoCloseable {
     // False asks the caller to use vanilla's blit, including when all effects are off.
     public boolean blit(RenderTarget input, RenderTarget output, RenderScaleConfig config) {
         boolean fsr = config.fsr && input.width <= output.width && input.height <= output.height;
+        boolean downsample = input.width > output.width && input.height > output.height;
+        var filter = config.getDownscaleFilter().resolve(Math.min(
+                (double) input.width / output.width, (double) input.height / output.height));
+        boolean grid = downsample && filter != RenderScaleConfig.DownscaleFilter.BILINEAR;
         boolean sharpen = config.getSharpeningMode() != RenderScaleConfig.SharpeningMode.OFF
                 && config.getSharpeningBlend() > 0.0f;
-        if (failed || (!fsr && !sharpen)) return false;
+        if (failed || (!fsr && !grid && !sharpen)) return false;
         RenderSystem.assertOnRenderThread();
 
         // All state changes inside this scope use raw GL and are restored before
         // returning, so Minecraft's and shader mods' cached state stays valid.
         try (State ignored = new State()) {
             initialize();
-            ensureIntermediate(output.width, output.height);
+            if (fsr || sharpen) ensureIntermediate(output.width, output.height);
             glDisable(GL_BLEND);
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
@@ -72,19 +76,23 @@ public final class LegacyFsrRenderer implements AutoCloseable {
             glBindVertexArray(vertexArray);
             glBindSampler(0, sampler);
             if (fsr) {
-                pass(program("easu", false, false), input.getColorTextureId(), framebuffer, GL_NEAREST, 1.0f);
-                pass(program("rcas", false, false), texture, output.frameBufferId, GL_NEAREST, 1.0f);
+                pass(program("easu", false, false), input.getColorTextureId(), framebuffer, output, GL_NEAREST, 1.0f);
+                pass(program("rcas", false, false), texture, output.frameBufferId, output, GL_NEAREST, 1.0f);
             } else {
-                int blit = programs.computeIfAbsent("blit", key -> link(BLIT));
-                pass(blit, input.getColorTextureId(), framebuffer, config.getFilter() ? GL_LINEAR : GL_NEAREST, 1.0f);
-                boolean denoise = config.getSharpeningMode() == RenderScaleConfig.SharpeningMode.RCAS_DENOISE;
-                pass(program("rcas", true, denoise), texture, output.frameBufferId, GL_NEAREST, config.getSharpeningBlend());
+                int resolve = grid ? program(filter == RenderScaleConfig.DownscaleFilter.SGSS ? "sgss" : "rgss", false, false)
+                        : programs.computeIfAbsent("blit", key -> link(BLIT));
+                pass(resolve, input.getColorTextureId(), sharpen ? framebuffer : output.frameBufferId,
+                        output, grid || config.getFilter() ? GL_LINEAR : GL_NEAREST, 1.0f);
+                if (sharpen) {
+                    boolean denoise = config.getSharpeningMode() == RenderScaleConfig.SharpeningMode.RCAS_DENOISE;
+                    pass(program("rcas", true, denoise), texture, output.frameBufferId, output, GL_NEAREST, config.getSharpeningBlend());
+                }
             }
             return true;
         } catch (IOException | RuntimeException exception) {
             close();
             failed = true;
-            Constants.LOG.error("FSR1/sharpening unavailable; using the standard blit until shaders reload", exception);
+            Constants.LOG.error("FSR1/grid downsampling/sharpening unavailable; using the standard blit until shaders reload", exception);
             return false;
         }
     }
@@ -125,14 +133,15 @@ public final class LegacyFsrRenderer implements AutoCloseable {
     }
 
     private int program(String name, boolean sharpen, boolean denoise) throws IOException {
-        boolean half = !sharpen && fp16Extension != 0;
+        boolean fsr = name.equals("easu") || name.equals("rcas");
+        boolean half = fsr && !sharpen && fp16Extension != 0;
         String key = name + (half ? "_fp16" : "") + (sharpen ? "_sharpen" : "") + (denoise ? "_denoise" : "");
         Integer cached = programs.get(key);
         if (cached != null) return cached;
         String source = read("core/" + name + (half ? "_fp16" : "") + ".fsh");
         int firstLine = source.indexOf('\n');
         String header = half ? "#version 450\n#define RENDERSCALE_FP16 " + fp16Extension + "\n"
-                : "#version 420\n";
+                : fsr ? "#version 420\n" : "#version 330\n";
         if (sharpen) header += "#define RENDERSCALE_SHARPNESS SharpeningStrength\n";
         if (denoise) header += "#define FSR_RCAS_DENOISE\n";
         source = header + source.substring(firstLine + 1);
@@ -142,7 +151,7 @@ public final class LegacyFsrRenderer implements AutoCloseable {
         return program;
     }
 
-    // Expand only the same imports used by the shared FSR shaders. The old
+    // Expand only the imports used by the shared FSR and grid shaders. The old
     // renderer has no Globals buffer; its output size is an ordinary uniform.
     private static String read(String path) throws IOException {
         var resource = Minecraft.getInstance().getResourceManager().getResourceOrThrow(
@@ -213,15 +222,15 @@ public final class LegacyFsrRenderer implements AutoCloseable {
         height = targetHeight;
     }
 
-    private void pass(int program, int input, int output, int filter, float strength) {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, output);
-        glViewport(0, 0, width, height);
+    private void pass(int program, int input, int framebuffer, RenderTarget output, int filter, float strength) {
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+        glViewport(0, 0, output.width, output.height);
         glUseProgram(program);
         glBindTexture(GL_TEXTURE_2D, input);
         glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, filter);
         glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, filter);
         glUniform1i(glGetUniformLocation(program, "InSampler"), 0);
-        glUniform2f(glGetUniformLocation(program, "ScreenSize"), width, height);
+        glUniform2f(glGetUniformLocation(program, "ScreenSize"), output.width, output.height);
         glUniform1f(glGetUniformLocation(program, "SharpeningStrength"), strength);
         glDrawArrays(GL_TRIANGLES, 0, 3);
     }

@@ -49,7 +49,7 @@ public class RenderScaleConfig implements ConfigData {
         }
     }
 
-    //? >= 1.21.11 {
+    //? >=1.21.11 || 1.20.1 || 1.21.1 {
     public enum DownscaleFilter implements me.shedaniel.clothconfig2.gui.entries.SelectionListEntry.Translatable {
         AUTO, BILINEAR, RGSS, SGSS;
 
@@ -112,7 +112,7 @@ public class RenderScaleConfig implements ConfigData {
     @ConfigEntry.Category("advanced")
     public boolean forceBilinear = false;
 
-    //? >=1.21.11 {
+    //? >=1.21.11 || 1.20.1 || 1.21.1 {
     @ConfigEntry.Category("advanced")
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     @ConfigEntry.Gui.Tooltip()
@@ -204,17 +204,13 @@ public class RenderScaleConfig implements ConfigData {
     public boolean getFilter() {
         double effectiveScale = RenderScale.getInstance() == null ? getScale()
                 : RenderScale.getInstance().getRenderScaleFactor();
-        //? >= 1.21.11 {
+        //? >=1.21.11 || 1.20.1 || 1.21.1 {
         return fsr || forceBilinear || getDownscaleFilter() == DownscaleFilter.BILINEAR || effectiveScale > 1.0;
-        //?} else {
-        /*//? 1.20.1 || 1.21.1 {
-        /^return fsr || forceBilinear || effectiveScale > 1.0;
-        ^///?} else
-        return forceBilinear || effectiveScale > 1.0;
-        *///?}
+        //?} else
+        //return forceBilinear || effectiveScale > 1.0;
     }
 
-    //? >= 1.21.11 {
+    //? >=1.21.11 || 1.20.1 || 1.21.1 {
     public DownscaleFilter getDownscaleFilter() {
         return downscaleFilter == null ? DownscaleFilter.AUTO : downscaleFilter;
     }

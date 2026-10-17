@@ -39,7 +39,7 @@ public final class RenderScaleEmbeddiumConfig {
                     ImmutableList.of(OptionGroup.createBuilder()
                             .setId(id("general_options"))
                             .add(option("scale", Integer.class)
-                                    .setControl(opt -> new SliderControl(opt, 1, 200, 1, RenderScaleEmbeddiumConfig::percent))
+                                    .setControl(opt -> new SliderControl(opt, 1, 400, 1, RenderScaleEmbeddiumConfig::percent))
                                     .setBinding((config, value) -> config.scale = value / 100.0f,
                                             config -> Math.round(config.scale * 100.0f))
                                     .build())
@@ -77,7 +77,7 @@ public final class RenderScaleEmbeddiumConfig {
                             .add(option("irisScale", Integer.class)
                                     .setName(Component.translatable("text.autoconfig.renderscale.option.irisScale.sodium"))
                                     .setTooltip(Component.translatable("text.autoconfig.renderscale.option.irisScale.@Tooltip.sodium"))
-                                    .setControl(opt -> new SliderControl(opt, 0, 200, 1, value -> value == 0
+                                    .setControl(opt -> new SliderControl(opt, 0, 400, 1, value -> value == 0
                                             ? Component.translatable("text.autoconfig.renderscale.option.irisScale.same")
                                             : percent(value)))
                                     .setBinding((config, value) -> config.irisScale = value <= 0 ? -1.0f : value / 100.0f,
@@ -92,6 +92,12 @@ public final class RenderScaleEmbeddiumConfig {
                             .add(option("forceBilinear", Boolean.class)
                                     .setControl(TickBoxControl::new)
                                     .setBinding((config, value) -> config.forceBilinear = value, config -> config.forceBilinear)
+                                    .build())
+                            .add(option("downscaleFilter", Integer.class)
+                                    .setControl(opt -> new SliderControl(opt, 0, RenderScaleConfig.DownscaleFilter.values().length - 1, 1,
+                                            value -> Component.translatable(RenderScaleConfig.DownscaleFilter.values()[value].getKey())))
+                                    .setBinding((config, value) -> config.downscaleFilter = RenderScaleConfig.DownscaleFilter.values()[value],
+                                            config -> config.getDownscaleFilter().ordinal())
                                     .build())
                             .add(option("sharpeningMode", Integer.class)
                                     .setControl(opt -> new SliderControl(opt, 0, 2, 1, value -> Component.translatable(
