@@ -1,6 +1,6 @@
 # RenderScale
 
-RenderScale allows you to change Minecraft's resolution without affecting the UI.
+RenderScale allows you to change Minecraft's resolution without affecting the UI. You can increase scale for antialiasing, or lower to improve performance. This is heavily recommended for laptops with retina displays!
 
 This is a fork of [ResolutionControl++](https://github.com/ModLabsCC/Resolution-Control), with added support for NeoForge.
 
@@ -14,15 +14,13 @@ Check out [Fabrishot](https://modrinth.com/mod/fabrishot) if you also want the l
 
 # How to use
 
-Press `U` (sometimes `O`) or, use the mod menu config to control the render scale multiplier. You can increase for antialiasing, or decrease to improve performance. This is heavily recommended for laptops with retina displays!
+Press `U` (sometimes `O`) or, use the mod menu config to control the render scale multiplier.
 
 ## Other features
 
-**FSR 1** support is available on 1.20.1, 1.21.1, and 1.21.11+. There are no plans to support DLSS or FSR 2+.
-
-Also, there is experimental support for **Dynamic Scaling** (1.4.0-alpha.6+), which tries to keep the game at your targeted FPS by changing the multiplier while you play. 
-
-Lastly you can force "linear" scale algorithm (similar to FXAA) in lower render scales if you want. It's best to leave it as OFF if you're using shaders since they usually have their own antialiasing.
+- **FSR 1** upscaling! Currently only available on 1.20.1, 1.21.1, and 1.21.11+. There are no plans to support DLSS or FSR 2+.
+- **Dynamic Scaling**, tries to keep the game at your targeted FPS by continuously changing the scale while you play. 
+- **Optional sharpening** post-processing.
 
 ---
 
@@ -30,7 +28,9 @@ Lastly you can force "linear" scale algorithm (similar to FXAA) in lower render 
 
 ## ⚠️ This mod is NOT compatible with Lunar Client / Feather Client. It will break if you use them.
 
-Aims to be compatible with any mod, including Sodium, Iris, etc. However, there are mods that could break RenderScale. You can report any issues [here](https://github.com/Zolo101/RenderScale/issues), or on my [discord](https://discord.com/invite/YVuuF9KB5j). Make sure to include your latest MC logs!
+Aims to be compatible with any mod, including Sodium, Iris, etc. However, there can be mods that break RenderScale. Please report any issues [here](https://github.com/Zolo101/RenderScale/issues), or on my [discord](https://discord.com/invite/YVuuF9KB5j). Make sure to include your latest MC logs!
+
+(26.2+) Works with Vulkan, including Iris Vulkan.
 
 Dynamic scaling is unavailable while shaders are enabled due to issues with stuttering.
 
@@ -38,13 +38,12 @@ Dynamic scaling is unavailable while shaders are enabled due to issues with stut
 
 # Supported Versions
 
-| Minecraft        | Fabric | NeoForge | Forge   |
-|------------------|--------|----------|---------|
-| 1.21.2 and above | ✅     | ✅       | 🚫      |
-| 1.21.0 - 1.21.1  | ✅ [1] | ✅ [1]   | 🚫      |
-| 1.20.2 - 1.20.6  | 🚫     | 🚫       | 🚫      |
-| 1.20.1           | ✅ [1] | 🚫       | ✅  [1] |
+| Minecraft        | Fabric  | NeoForge | Forge    |
+|------------------|---------|----------|----------|
+| 1.21.2 and above | ✅      | ✅       | 🚫       |
+| 1.21.1           | ✅ [^1] | ✅ [^1]  | 🚫       |
+| 1.20.1           | ✅ [^1] | 🚫       | ✅  [^1] |
 
-[1] Does not support Fabulous graphics
+[^1]: Does not support Fabulous graphics
 
 Check out the previous forks, [ResolutionControl++](https://modrinth.com/mod/resolution-control-plus-plus), [ResolutionControl+](https://modrinth.com/mod/resolution-control-plus), [ResolutionControl](https://github.com/juliand665/Resolution-Control) for older versions

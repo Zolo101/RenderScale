@@ -1,8 +1,13 @@
 # 2.0.0-beta.1
 
-1.20.1 and 1.21.1 now supports FSR 1 upscaling, and there's RGSS support!
+1.20.1 and 1.21.1 now support FSR 1 upscaling and Rotated Grid and Sparse Grid downsampling!
 
 Also added Russian translations, thanks to mpustovoi!
+
+## Fixes
+
+- (26.3) Fixed issue with Iris shaders causing clouds to render in front of terrain [#111](https://github.com/Zolo101/RenderScale/issues/111)
+- (1.21.1) Fixed scales above 100% not being downscaled properly
 
 ## Changes
  
